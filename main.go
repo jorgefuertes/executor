@@ -26,6 +26,8 @@ const (
 	ShowNone       Output = "none"
 )
 
+var version string
+
 func main() {
 	// flags
 	desc := flag.String("desc", "", "Command description")
@@ -33,6 +35,7 @@ func main() {
 	showOutput := flag.String("show-output", ShowNone.String(), "Show stdout, stderr, both or none")
 	showOnErr := flag.String("show-on-err", ShowOnlyStderr.String(), "Show stdout, stderr or both")
 	envFile := flag.String("env-file", "./.env.properties", "Enviroment file")
+	showVersion := flag.Bool("version", false, "Show version")
 
 	flag.Parse()
 
@@ -40,6 +43,11 @@ func main() {
 		flag.Usage()
 		fmt.Printf("\n[*] Include command and arguments at the end of the command line\n\n")
 		os.Exit(1)
+	}
+
+	if *showVersion {
+		fmt.Println(version)
+		os.Exit(0)
 	}
 
 	if *desc == "" {

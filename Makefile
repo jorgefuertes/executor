@@ -3,7 +3,7 @@ VERSION=v1.0.0
 SOURCE_FILE := main.go
 BUILD_DIR := build
 RELEASE_DIR := release
-OS_LIST := linux darwin windows
+OS_LIST := linux darwin windowsgit 
 ARCH_LIST := amd64 386 arm arm64
 INSTALL_FILE := ~/bin/executor
 EXE_NAME := executor
@@ -16,7 +16,7 @@ run:
 
 build: clean lint
 	@mkdir -p $(BUILD_DIR)
-	@go build -ldflags="-s -w" -o $(BUILD_DIR)/$(EXE_NAME) main.go
+	@go build -ldflags="-s -w -X main.version=$(VERSION)" -o $(BUILD_DIR)/$(EXE_NAME) main.go
 	@echo "Built to $(BUILD_DIR)/$(EXE_NAME)"
 
 clean:
@@ -47,7 +47,7 @@ release: clean lint
 			fi; \
 			if [[ "$$os/$$arch" != "darwin/arm" && "$$os/$$arch" != "darwin/386" ]]; then \
 				echo "Building $$os/$$arch --> $$f"; \
-				GOOS=$$os GOARCH=$$arch go build -o $(RELEASE_DIR)/$$f $(SOURCE_FILE); \
+				GOOS=$$os GOARCH=$$arch go build -ldflags="-s -w -X main.version=$(VERSION)" -o $(RELEASE_DIR)/$$f $(SOURCE_FILE); \
 				echo "Compressing $$f --> $$tar_name"; \
 				tar -C $(RELEASE_DIR) -cjf $(RELEASE_DIR)/$$tar_name $$f; \
 				rm $(RELEASE_DIR)/$$f; \
