@@ -3,18 +3,18 @@ package terminal
 import (
 	"context"
 	"fmt"
+	"math"
 	"strings"
 	"time"
 
 	"github.com/fatih/color"
 )
 
-type SpinnerStyle string
+const spinnerDelayMilliseconds = 100
 
 type Progress struct {
 	spin       int
 	start      time.Time
-	elapsed    time.Duration
 	ctx        context.Context
 	cancel     context.CancelFunc
 	chars      []string
@@ -45,7 +45,6 @@ func NewProgress(style string) *Progress {
 	return &Progress{
 		spin:       0,
 		start:      time.Now(),
-		elapsed:    time.Duration(0),
 		ctx:        ctx,
 		cancel:     cancel,
 		chars:      chars,
@@ -53,18 +52,52 @@ func NewProgress(style string) *Progress {
 	}
 }
 
+func (p *Progress) elapsed() string {
+	t := time.Since(p.start)
+	m := int(math.Floor(t.Minutes()))
+	s := int(math.Floor(t.Seconds())) % 60
+	out := "["
+	if m > 0 {
+		out += fmt.Sprintf("%d min", m)
+	}
+	if s > 0 || m == 0 {
+		if m > 0 {
+			out += ", "
+		}
+		out += fmt.Sprintf("%d sec", s)
+	}
+	out += "]"
+
+	return out
+}
+
 func (p *Progress) print() {
+
+	if !IsInteractive() {
+		return
+	}
+
 	SavePos()
-	p.elapsed = time.Since(p.start)
-	spinStr := fmt.Sprintf("[Elapsed %.0fm%.0fs] %s", p.elapsed.Minutes(), p.elapsed.Seconds(), p.chars[p.spin])
-	fmt.Print(spinStr)
-	p.printedLen = len(spinStr)
+	et := p.elapsed()
+	spin := p.chars[p.spin]
+	p.printedLen = len(et + " " + spin)
+	SetColor(color.FgCyan)
+	fmt.Print(et + " ")
+	SetColor(color.FgYellow)
+	fmt.Print(spin)
+	ResetColor()
 	RestorePos()
 }
 
 func (p *Progress) Start() {
-	p.spin = 0
 	p.start = time.Now()
+
+	if !IsInteractive() {
+		return
+	}
+
+	p.spin = 0
+
 	HideCursor()
 
 	go func() {
@@ -78,7 +111,7 @@ func (p *Progress) Start() {
 				p.spin = 0
 			}
 			p.print()
-			time.Sleep(150 * time.Millisecond)
+			time.Sleep(spinnerDelayMilliseconds * time.Millisecond)
 		}
 	}()
 }
@@ -86,11 +119,14 @@ func (p *Progress) Start() {
 func (p *Progress) Stop() {
 	p.cancel()
 
-	SavePos()
-	fmt.Print(strings.Repeat(" ", p.printedLen+1))
-	RestorePos()
-	color.Set(color.FgHiBlue)
-	fmt.Printf("[Total %.0fm%.0fs] ", p.elapsed.Minutes(), p.elapsed.Seconds())
-	color.Set(color.Reset)
+	if IsInteractive() {
+		SavePos()
+		fmt.Print(strings.Repeat(" ", p.printedLen+1))
+		RestorePos()
+		SetColor(color.FgHiBlue)
+	}
+
+	fmt.Print(p.elapsed() + " ")
+	SetColor(color.Reset)
 	ShowCursor()
 }

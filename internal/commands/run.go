@@ -20,6 +20,8 @@ func Run(c *cli.Context) error {
 	desc := c.String("desc")
 	style := c.String("spinner-style")
 
+	terminal.SetNoColor(c.Bool("no-color"))
+
 	cmdLine := c.String("cmd")
 	if len(cmdLine) == 0 {
 		return ErrEmptyCommand

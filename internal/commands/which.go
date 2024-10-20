@@ -44,6 +44,7 @@ func isExecutable(cmd string) bool {
 
 func Which(c *cli.Context) error {
 	cmd := c.String("cmd")
+	terminal.SetNoColor(c.Bool("no-color"))
 
 	terminal.Action(terminal.InfoLevel, "Looking for "+cmd)
 

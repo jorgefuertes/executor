@@ -18,19 +18,37 @@ const (
 	ErrorLevel
 )
 
+var interactive bool
+var nocolor bool
+
+func init() {
+	interactive = isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd())
+}
+
+func IsInteractive() bool {
+	if nocolor {
+		return false
+	}
+	return interactive
+}
+
+func SetNoColor(forceNoColor bool) {
+	nocolor = forceNoColor
+}
+
 func caret(level Level) {
 	switch level {
 	case DebugLevel:
-		color.Set(color.FgHiBlue)
+		SetColor(color.FgHiBlue)
 	case InfoLevel:
-		color.Set(color.FgHiGreen)
+		SetColor(color.FgHiGreen)
 	case WarnLevel:
-		color.Set(color.FgHiYellow)
+		SetColor(color.FgHiYellow)
 	case ErrorLevel:
-		color.Set(color.FgHiRed)
+		SetColor(color.FgHiRed)
 	}
 	fmt.Print(">")
-	color.Set(color.Reset)
+	SetColor(color.Reset)
 	fmt.Print(" ")
 }
 
@@ -41,11 +59,11 @@ func Line(level Level, msg string) {
 
 func Action(level Level, msg string) {
 	caret(level)
-	color.Set(color.FgWhite)
+	SetColor(color.FgWhite)
 	fmt.Print(msg)
-	color.Set(color.FgWhite)
+	SetColor(color.FgWhite)
 	fmt.Print(": ")
-	color.Set(color.Reset)
+	SetColor(color.Reset)
 }
 
 func Error(err error) {
@@ -54,34 +72,34 @@ func Error(err error) {
 	}
 
 	caret(ErrorLevel)
-	color.Set(color.BgRed, color.FgWhite)
+	SetColor(color.BgRed, color.FgWhite)
 	fmt.Print("ERROR")
-	color.Set(color.Reset)
-	color.Set(color.FgHiWhite)
+	SetColor(color.Reset)
+	SetColor(color.FgHiWhite)
 	fmt.Print(": ")
-	color.Set(color.FgWhite)
+	SetColor(color.FgWhite)
 	fmt.Print(err.Error())
-	color.Set(color.Reset)
+	SetColor(color.Reset)
 	fmt.Println()
 }
 
 func Result(ok bool) {
 	if ok {
-		color.Set(color.BgHiGreen, color.FgHiWhite)
+		SetColor(color.BgHiGreen, color.FgHiWhite)
 		fmt.Print(" OK ")
 	} else {
-		color.Set(color.BgHiRed, color.FgHiWhite)
+		SetColor(color.BgHiRed, color.FgHiWhite)
 		fmt.Print(" FAIL ")
 	}
 
-	color.Set(color.Reset)
+	SetColor(color.Reset)
 	fmt.Println()
 }
 
 func TableTile(title string) {
-	color.Set(color.BgHiBlue, color.FgWhite)
+	SetColor(color.BgHiBlue, color.FgWhite)
 	fmt.Print("  " + title + ":  ")
-	color.Set(color.Reset)
+	SetColor(color.Reset)
 	fmt.Println()
 }
 
@@ -99,10 +117,6 @@ func ShowOutput(level Level, title string, out bytes.Buffer) {
 	fmt.Println()
 	fmt.Println(out.String())
 	Line(level, "---[END "+title+"]----")
-}
-
-func IsInteractive() bool {
-	return isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd())
 }
 
 func SavePos() {

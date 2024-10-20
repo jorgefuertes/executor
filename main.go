@@ -98,6 +98,13 @@ func main() {
 						Usage: "How many levels we should recurse back looking for the env file, if its not an absolute path",
 						Value: 5,
 					},
+					&cli.BoolFlag{
+						Name:       "no-color",
+						Aliases:    []string{"nc"},
+						Value:      false,
+						Usage:      "Disable color output and spinner",
+						HasBeenSet: true,
+					},
 					&cli.StringFlag{
 						Name:     "cmd",
 						Aliases:  []string{"c"},
