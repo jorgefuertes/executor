@@ -9,19 +9,38 @@ import (
 	"github.com/fatih/color"
 )
 
+type SpinnerStyle string
+
 type Progress struct {
 	spin       int
 	start      time.Time
 	elapsed    time.Duration
 	ctx        context.Context
 	cancel     context.CancelFunc
+	chars      []string
 	printedLen int
 }
 
-var spinner = []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧"}
+var spinners = map[string][]string{
+	"dots":        {"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧"},
+	"arrow":       {"←", "↖", "↑", "↗", "→", "↘", "↓", "↙"},
+	"star":        {"★", "☆", "★", "☆", "★", "☆", "★", "☆"},
+	"circle":      {"◐", "◓", "◑", "◒", "◐", "◓", "◑", "◒"},
+	"square":      {"▖", "▘", "▝", "▗", "▖", "▘", "▝", "▗"},
+	"square-star": {"▌", "▞", "▛", "▙", "▟", "█", "▐", "█"},
+	"line":        {"⎺", "⎻", "⎼", "⎽", "⎼", "⎻", "⎺", "⎼"},
+	"line-star":   {"⎸", "⎹", "⎺", "⎻", "⎼", "⎽", "⎾", "⎿"},
+	"bar":         {`|`, `/`, `-`, `\`, `|`, `/`, `-`, `\`},
+	"o":           {".", "o", "O", "0", "O", "o", ".", " "},
+}
 
-func NewProgress() *Progress {
+func NewProgress(style string) *Progress {
 	ctx, cancel := context.WithCancel(context.Background())
+
+	chars, ok := spinners[style]
+	if !ok {
+		chars = spinners["dots"]
+	}
 
 	return &Progress{
 		spin:       0,
@@ -29,6 +48,7 @@ func NewProgress() *Progress {
 		elapsed:    time.Duration(0),
 		ctx:        ctx,
 		cancel:     cancel,
+		chars:      chars,
 		printedLen: 0,
 	}
 }
@@ -36,7 +56,7 @@ func NewProgress() *Progress {
 func (p *Progress) print() {
 	SavePos()
 	p.elapsed = time.Since(p.start)
-	spinStr := fmt.Sprintf("[Elapsed %.0fm%.0fs] %s", p.elapsed.Minutes(), p.elapsed.Seconds(), spinner[p.spin])
+	spinStr := fmt.Sprintf("[Elapsed %.0fm%.0fs] %s", p.elapsed.Minutes(), p.elapsed.Seconds(), p.chars[p.spin])
 	fmt.Print(spinStr)
 	p.printedLen = len(spinStr)
 	RestorePos()

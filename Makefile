@@ -7,6 +7,7 @@ OS_LIST := linux darwin windowsgit
 ARCH_LIST := amd64 386 arm arm64
 INSTALL_FILE := ~/bin/executor
 EXE_NAME := executor
+STYLE_LIST := dots o arrow star circle square square-star line line-star bar
 
 version:
 	@echo $(VERSION)
@@ -17,8 +18,11 @@ test:
 run-which:
 	@go run main.go which -c ls
 
+
 run-exe:
-	@go run main.go run --desc "Execution test" -c "sleep 10; echo \"!Hola, Mundo!\""
+	@for style in $(STYLE_LIST); do \
+		go run main.go run --desc "Execution test" -st $$style -c "sleep 10; echo \"!Hola, Mundo!\""; \
+	done
 
 build: clean lint test
 	@mkdir -p $(BUILD_DIR)

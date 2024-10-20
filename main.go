@@ -67,6 +67,12 @@ func main() {
 						Usage:   "Show enviroment before start",
 					},
 					&cli.StringFlag{
+						Name:    "spinner-style",
+						Aliases: []string{"st"},
+						Usage:   "Spinner style: dots, arrow, star, circle, square, square-star, line, line-star, bar, o",
+						Value:   "dots",
+					},
+					&cli.StringFlag{
 						Name:    "show-on-success",
 						Aliases: []string{"os"},
 						Usage:   "Show stdout, stderr, both or none",

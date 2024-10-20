@@ -18,6 +18,7 @@ func Run(c *cli.Context) error {
 	showOutput := c.String("show-on-success")
 	showOnErr := c.String("show-on-err")
 	desc := c.String("desc")
+	style := c.String("spinner-style")
 
 	cmdLine := c.String("cmd")
 	if len(cmdLine) == 0 {
@@ -55,7 +56,7 @@ func Run(c *cli.Context) error {
 
 	terminal.Action(terminal.InfoLevel, desc)
 
-	progres := terminal.NewProgress()
+	progres := terminal.NewProgress(style)
 	progres.Start()
 	err = cmd.Run()
 	progres.Stop()
