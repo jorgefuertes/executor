@@ -7,13 +7,13 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/joho/godotenv"
 	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli/v2"
 )
 
 func Run(c *cli.Context) error {
-	envFile := c.String("env-file")
+	envFileName := c.String("env-file")
+	envRecurseLevels := c.Int("env-recurse-level")
 	showEnv := c.Bool("show-env")
 	showOutput := c.String("show-on-success")
 	showOnErr := c.String("show-on-err")
@@ -24,19 +24,16 @@ func Run(c *cli.Context) error {
 		return ErrEmptyCommand
 	}
 
-	mainEnv, err := godotenv.Read(envFile)
+	mainEnv, err := getEnv(envFileName, envRecurseLevels)
 	if err != nil {
-		curDir, _ := os.Getwd()
-		terminal.Error(fmt.Errorf("cannot read %s/%s", curDir, envFile))
-		terminal.Error(err)
-		os.Exit(1)
+		return err
 	}
 
 	if showEnv {
 		fmt.Println()
 		terminal.TableTile("Enviroment")
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetCaption(true, fmt.Sprintf("%s: %d vars", envFile, len(mainEnv)))
+		table.SetCaption(true, fmt.Sprintf("%s: %d vars", envFileName, len(mainEnv)))
 		table.SetHeader([]string{"Variable", "Value"})
 		for k, v := range mainEnv {
 			table.Rich([]string{k, v}, []tablewriter.Colors{{tablewriter.FgCyanColor}, {tablewriter.FgHiYellowColor}})
@@ -60,27 +57,11 @@ func Run(c *cli.Context) error {
 
 	progres := terminal.NewProgress()
 	progres.Start()
-
-	err = cmd.Start()
-	if err != nil {
-		terminal.Error(err)
-		os.Exit(1)
-	}
-
-	err = cmd.Wait()
+	err = cmd.Run()
 	progres.Stop()
+	terminal.Result(err == nil)
 
-	if err == nil {
-		switch showOutput {
-		case "stdout":
-			terminal.ShowOutput(terminal.DebugLevel, "COMMAND STANDARD OUTPUT", stdout)
-		case "stderr":
-			terminal.ShowOutput(terminal.WarnLevel, "COMMAND ERROR OUTPUT", stderr)
-		case "both":
-			terminal.ShowOutput(terminal.DebugLevel, "COMMAND STANDARD OUTPUT", stdout)
-			terminal.ShowOutput(terminal.WarnLevel, "COMMAND ERROR OUTPUT", stderr)
-		}
-	} else {
+	if err != nil {
 		switch showOnErr {
 		case "stdout":
 			terminal.ShowOutput(terminal.DebugLevel, "COMMAND STANDARD OUTPUT", stdout)
@@ -90,7 +71,18 @@ func Run(c *cli.Context) error {
 			terminal.ShowOutput(terminal.DebugLevel, "COMMAND STANDARD OUTPUT", stdout)
 			terminal.ShowOutput(terminal.WarnLevel, "COMMAND ERROR OUTPUT", stderr)
 		}
+		return ErrExecutionFailed
 	}
 
-	return ErrExecutionFailed
+	switch showOutput {
+	case "stdout":
+		terminal.ShowOutput(terminal.DebugLevel, "COMMAND STANDARD OUTPUT", stdout)
+	case "stderr":
+		terminal.ShowOutput(terminal.WarnLevel, "COMMAND ERROR OUTPUT", stderr)
+	case "both":
+		terminal.ShowOutput(terminal.DebugLevel, "COMMAND STANDARD OUTPUT", stdout)
+		terminal.ShowOutput(terminal.WarnLevel, "COMMAND ERROR OUTPUT", stderr)
+	}
+
+	return nil
 }

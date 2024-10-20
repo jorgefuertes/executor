@@ -1,0 +1,4 @@
+# Test environment file
+
+TEST=true
+A_VARIABLE="just a test env var"

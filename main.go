@@ -63,12 +63,12 @@ func main() {
 					},
 					&cli.BoolFlag{
 						Name:    "show-env",
-						Aliases: []string{"e"},
+						Aliases: []string{"se"},
 						Usage:   "Show enviroment before start",
 					},
 					&cli.StringFlag{
 						Name:    "show-on-success",
-						Aliases: []string{"o"},
+						Aliases: []string{"os"},
 						Usage:   "Show stdout, stderr, both or none",
 						Value:   ShowNone.String(),
 					},
@@ -80,14 +80,14 @@ func main() {
 					},
 					&cli.StringFlag{
 						Name:    "env-file",
-						Aliases: []string{"ef"},
-						Usage:   "Enviroment file",
+						Aliases: []string{"n"},
+						Usage:   "Enviroment file ('none' to disable)",
 						Value:   ".env",
 					},
 					&cli.IntFlag{
 						Name: "env-recurse-levels",
 						Aliases: []string{
-							"erl",
+							"r",
 						},
 						Usage: "How many levels we should recurse back looking for the env file, if its not an absolute path",
 						Value: 5,
