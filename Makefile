@@ -3,7 +3,7 @@ VERSION=v1.0.0
 SOURCE_FILE := main.go
 BUILD_DIR := build
 RELEASE_DIR := release
-OS_LIST := linux darwin windowsgit 
+OS_LIST := linux darwin windowsgit
 ARCH_LIST := amd64 386 arm arm64
 INSTALL_FILE := ~/bin/executor
 EXE_NAME := executor
@@ -11,10 +11,16 @@ EXE_NAME := executor
 version:
 	@echo $(VERSION)
 
-run:
-	go run main.go  -desc test -show-env -show-output stdout -show-on-err both echo "!Hola, Mundo!"
+test:
+	go test -v ./...
 
-build: clean lint
+run-which:
+	@go run main.go which -c ls
+
+run-exe:
+	@go run main.go run --desc "Execution test" -c "sleep 10; echo \"!Hola, Mundo!\""
+
+build: clean lint test
 	@mkdir -p $(BUILD_DIR)
 	@go build -ldflags="-s -w -X main.version=$(VERSION)" -o $(BUILD_DIR)/$(EXE_NAME) main.go
 	@echo "Built to $(BUILD_DIR)/$(EXE_NAME)"
@@ -36,7 +42,7 @@ uninstall:
 	@rm -rf $(INSTALL_FILE)
 	@echo "Removed $(INSTALL_FILE)"
 
-release: clean lint
+release: clean lint test
 	@mkdir -p $(RELEASE_DIR)
 	@for os in $(OS_LIST); do \
 		for arch in $(ARCH_LIST); do \

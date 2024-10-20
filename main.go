@@ -1,16 +1,12 @@
 package main
 
 import (
-	"bytes"
-	"flag"
+	"executor/internal/commands"
+	"executor/internal/terminal"
 	"fmt"
 	"os"
-	"os/exec"
-	"strings"
 
-	"executor/internal/terminal"
-	"github.com/joho/godotenv"
-	"github.com/olekukonko/tablewriter"
+	"github.com/urfave/cli/v2"
 )
 
 type Output string
@@ -20,120 +16,99 @@ func (o Output) String() string {
 }
 
 const (
-	ShowOnlyStdout Output = "stdout"
-	ShowOnlyStderr Output = "stderr"
-	ShowBoth       Output = "both"
-	ShowNone       Output = "none"
+	whichCommandName        = "which"
+	runCommandName          = "run"
+	ShowOnlyStdout   Output = "stdout"
+	ShowOnlyStderr   Output = "stderr"
+	ShowBoth         Output = "both"
+	ShowNone         Output = "none"
 )
 
 var version string
 
 func main() {
-	// flags
-	desc := flag.String("desc", "", "Command description")
-	showEnv := flag.Bool("show-env", false, "Show enviroment before start")
-	showOutput := flag.String("show-output", ShowNone.String(), "Show stdout, stderr, both or none")
-	showOnErr := flag.String("show-on-err", ShowOnlyStderr.String(), "Show stdout, stderr or both")
-	envFile := flag.String("env-file", "./.env.properties", "Enviroment file")
-	showVersion := flag.Bool("version", false, "Show version")
-
-	flag.Parse()
-
-	usage := func() {
-		flag.Usage()
-		fmt.Printf("\n[*] Include command and arguments at the end of the command line\n\n")
-		os.Exit(1)
+	app := &cli.App{
+		Name:           "executor",
+		Usage:          "Execute commands in fancy way",
+		Version:        version,
+		DefaultCommand: runCommandName,
+		Commands: []*cli.Command{
+			{
+				Name:  whichCommandName,
+				Usage: "Check if a command exists in the system path",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:    "cmd",
+						Aliases: []string{"c"},
+						Usage:   "Command to check",
+					},
+					&cli.StringFlag{
+						Name:    "not-found-msg",
+						Aliases: []string{"m"},
+						Usage:   "Text to show if command not found, typically some install hint",
+						Value:   "Command not found, please install it now.",
+					},
+				},
+				Action: commands.Which,
+			},
+			{
+				Name:  runCommandName,
+				Usage: "Run a command",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:     "desc",
+						Aliases:  []string{"d"},
+						Usage:    "Command description",
+						Required: true,
+					},
+					&cli.BoolFlag{
+						Name:    "show-env",
+						Aliases: []string{"e"},
+						Usage:   "Show enviroment before start",
+					},
+					&cli.StringFlag{
+						Name:    "show-on-success",
+						Aliases: []string{"o"},
+						Usage:   "Show stdout, stderr, both or none",
+						Value:   ShowNone.String(),
+					},
+					&cli.StringFlag{
+						Name:    "show-on-err",
+						Aliases: []string{"oe"},
+						Usage:   "Show stdout, stderr or both",
+						Value:   ShowOnlyStderr.String(),
+					},
+					&cli.StringFlag{
+						Name:    "env-file",
+						Aliases: []string{"ef"},
+						Usage:   "Enviroment file",
+						Value:   ".env",
+					},
+					&cli.IntFlag{
+						Name: "env-recurse-levels",
+						Aliases: []string{
+							"erl",
+						},
+						Usage: "How many levels we should recurse back looking for the env file, if its not an absolute path",
+						Value: 5,
+					},
+					&cli.StringFlag{
+						Name:     "cmd",
+						Aliases:  []string{"c"},
+						Usage:    "Command to run",
+						Required: true,
+					},
+				},
+				Action: commands.Run,
+			},
+		},
 	}
 
-	if *showVersion {
-		fmt.Println(version)
-		os.Exit(0)
-	}
-
-	if *desc == "" {
-		usage()
-	}
-
-	args := flag.Args()
-	if len(args) == 0 {
-		usage()
-	}
-
-	cmdLine := strings.Join(args, " ")
-	cmdLine = strings.Trim(cmdLine, `"`)
-
-	if cmdLine == "" {
-		usage()
-	}
-
-	mainEnv, err := godotenv.Read(*envFile)
+	err := app.Run(os.Args)
 	if err != nil {
-		curDir, _ := os.Getwd()
-		terminal.Error(fmt.Errorf("cannot read %s/%s", curDir, *envFile))
+		fmt.Println()
 		terminal.Error(err)
+		fmt.Println()
 		os.Exit(1)
 	}
-
-	if *showEnv {
-		fmt.Println()
-		terminal.TableTile("Enviroment")
-		table := tablewriter.NewWriter(os.Stdout)
-		table.SetCaption(true, fmt.Sprintf("%s: %d vars", *envFile, len(mainEnv)))
-		table.SetHeader([]string{"Variable", "Value"})
-		for k, v := range mainEnv {
-			table.Rich([]string{k, v}, []tablewriter.Colors{{tablewriter.FgCyanColor}, {tablewriter.FgHiYellowColor}})
-		}
-		table.Render()
-		fmt.Println()
-	}
-
-	cmd := exec.Command("sh", "-c", cmdLine)
-
-	cmd.Env = os.Environ()
-	for k, v := range mainEnv {
-		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", k, v))
-	}
-
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	terminal.Action(terminal.InfoLevel, *desc)
-
-	progres := terminal.NewProgress()
-	progres.Start()
-
-	err = cmd.Start()
-	if err != nil {
-		terminal.Error(err)
-		os.Exit(1)
-	}
-
-	err = cmd.Wait()
-	progres.Stop()
-
-	terminal.ActionError(err)
-	if err == nil {
-		switch Output(*showOutput) {
-		case ShowOnlyStdout:
-			terminal.ShowOutput(terminal.DebugLevel, "COMMAND STANDARD OUTPUT", stdout)
-		case ShowOnlyStderr:
-			terminal.ShowOutput(terminal.WarnLevel, "COMMAND ERROR OUTPUT", stderr)
-		case ShowBoth:
-			terminal.ShowOutput(terminal.DebugLevel, "COMMAND STANDARD OUTPUT", stdout)
-			terminal.ShowOutput(terminal.WarnLevel, "COMMAND ERROR OUTPUT", stderr)
-		}
-	} else {
-		switch Output(*showOnErr) {
-		case ShowOnlyStdout:
-			terminal.ShowOutput(terminal.DebugLevel, "COMMAND STANDARD OUTPUT", stdout)
-		case ShowOnlyStderr:
-			terminal.ShowOutput(terminal.WarnLevel, "COMMAND ERROR OUTPUT", stderr)
-		case ShowBoth:
-			terminal.ShowOutput(terminal.DebugLevel, "COMMAND STANDARD OUTPUT", stdout)
-			terminal.ShowOutput(terminal.WarnLevel, "COMMAND ERROR OUTPUT", stderr)
-		}
-	}
-
-	os.Exit(cmd.ProcessState.ExitCode())
 }

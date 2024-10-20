@@ -65,11 +65,6 @@ func Error(err error) {
 	fmt.Println()
 }
 
-func ActionError(err error) {
-	Result(err == nil)
-	Error(err)
-}
-
 func Result(ok bool) {
 	if ok {
 		color.Set(color.BgHiGreen, color.FgHiWhite)
