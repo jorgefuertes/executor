@@ -21,7 +21,7 @@ run-which:
 
 run-exe:
 	@for style in $(STYLE_LIST); do \
-		go run main.go run --desc "Execution test" -st $$style -c "sleep 1; echo \"!Hola, Mundo!\""; \
+		go run main.go run --desc "Execution test" -st $$style -c "sleep 2; echo \"!Hola, Mundo!\""; \
 	done
 	@go run main.go run --desc "Not interactive and no color test" --nc -st bar -c "sleep 1; echo \"!Hola, Mundo!\""
 
