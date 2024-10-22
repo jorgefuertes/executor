@@ -1,12 +1,12 @@
 package commands
 
 import (
-	"executor/internal/terminal"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/urfave/cli/v2"
+	"executor/internal/config"
+	"executor/internal/terminal"
 )
 
 func isExecutable(cmd string) bool {
@@ -19,7 +19,7 @@ func isExecutable(cmd string) bool {
 		if err != nil {
 			return false
 		}
-		if !info.IsDir() && info.Mode().IsRegular() && info.Mode().Perm()&0100 != 0 {
+		if !info.IsDir() && info.Mode().IsRegular() && info.Mode().Perm()&0o100 != 0 {
 			return true
 		}
 		return false
@@ -34,7 +34,7 @@ func isExecutable(cmd string) bool {
 		if err != nil {
 			continue
 		}
-		if !info.IsDir() && info.Mode().IsRegular() && info.Mode().Perm()&0100 != 0 {
+		if !info.IsDir() && info.Mode().IsRegular() && info.Mode().Perm()&0o100 != 0 {
 			return true
 		}
 	}
@@ -42,20 +42,21 @@ func isExecutable(cmd string) bool {
 	return false
 }
 
-func Which(c *cli.Context) error {
-	cmd := c.String("cmd")
-	terminal.SetNoColor(c.Bool("no-color"))
+func Which(cfg *config.Config) error {
+	ok := isExecutable(cfg.Command)
 
-	terminal.Action(terminal.InfoLevel, "Looking for "+cmd)
-
-	ok := isExecutable(cmd)
-	terminal.Result(ok)
-
-	if ok {
+	if ok && cfg.Silent {
 		return nil
 	}
 
-	terminal.Line(terminal.WarnLevel, c.String("not-found-msg"))
+	terminal.SetNoColor(cfg.NoColor)
+	terminal.Action(terminal.InfoLevel, "Looking for "+cfg.Command)
+	terminal.Result(ok)
 
-	return ErrCommandNotFound
+	if !ok {
+		terminal.Line(terminal.WarnLevel, cfg.NotFoundMsg)
+		return ErrCommandNotFound
+	}
+
+	return nil
 }

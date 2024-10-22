@@ -1,11 +1,12 @@
 package main
 
 import (
-	"executor/internal/commands"
-	"executor/internal/terminal"
 	"fmt"
 	"os"
 
+	"executor/internal/commands"
+	"executor/internal/config"
+	"executor/internal/terminal"
 	"github.com/urfave/cli/v2"
 )
 
@@ -16,12 +17,8 @@ func (o Output) String() string {
 }
 
 const (
-	whichCommandName        = "which"
-	runCommandName          = "run"
-	ShowOnlyStdout   Output = "stdout"
-	ShowOnlyStderr   Output = "stderr"
-	ShowBoth         Output = "both"
-	ShowNone         Output = "none"
+	whichCommandName = "which"
+	runCommandName   = "run"
 )
 
 var version string
@@ -37,6 +34,25 @@ func main() {
 				Name:  whichCommandName,
 				Usage: "Check if a command exists in the system path",
 				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:    "silent",
+						Aliases: []string{"s"},
+						Usage:   "Silent if command is found",
+						Value:   false,
+					},
+					&cli.BoolFlag{
+						Name:       "no-color",
+						Aliases:    []string{"nc"},
+						Value:      false,
+						Usage:      "Disable color output and spinner",
+						HasBeenSet: true,
+					},
+					&cli.BoolFlag{
+						Name:    "show-config",
+						Aliases: []string{"sc"},
+						Usage:   "Show config before start",
+						Value:   false,
+					},
 					&cli.StringFlag{
 						Name:    "cmd",
 						Aliases: []string{"c"},
@@ -49,7 +65,7 @@ func main() {
 						Value:   "Command not found, please install it now.",
 					},
 				},
-				Action: commands.Which,
+				Action: newActionFunc(commands.Which),
 			},
 			{
 				Name:  runCommandName,
@@ -65,6 +81,12 @@ func main() {
 						Name:    "show-env",
 						Aliases: []string{"se"},
 						Usage:   "Show enviroment before start",
+						Value:   false,
+					},
+					&cli.BoolFlag{
+						Name:    "show-config",
+						Aliases: []string{"sc"},
+						Usage:   "Show config before start",
 					},
 					&cli.StringFlag{
 						Name:    "spinner-style",
@@ -72,17 +94,17 @@ func main() {
 						Usage:   "Spinner style: dots, arrow, star, circle, square, square-star, line, line-star, bar, o",
 						Value:   "dots",
 					},
-					&cli.StringFlag{
-						Name:    "show-on-success",
-						Aliases: []string{"os"},
-						Usage:   "Show stdout, stderr, both or none",
-						Value:   ShowNone.String(),
+					&cli.BoolFlag{
+						Name:    "show-output",
+						Aliases: []string{"so"},
+						Usage:   "Show command output when command it's successful",
+						Value:   false,
 					},
-					&cli.StringFlag{
-						Name:    "show-on-err",
-						Aliases: []string{"oe"},
-						Usage:   "Show stdout, stderr or both",
-						Value:   ShowOnlyStderr.String(),
+					&cli.BoolFlag{
+						Name:    "show-output-on-error",
+						Aliases: []string{"soe"},
+						Usage:   "Set false to hide command output when command it's not successful",
+						Value:   true,
 					},
 					&cli.StringFlag{
 						Name:    "env-file",
@@ -112,7 +134,7 @@ func main() {
 						Required: true,
 					},
 				},
-				Action: commands.Run,
+				Action: newActionFunc(commands.Run),
 			},
 		},
 	}
@@ -123,5 +145,17 @@ func main() {
 		terminal.Error(err)
 		fmt.Println()
 		os.Exit(1)
+	}
+}
+
+type actionFunc func(cfg *config.Config) error
+
+func newActionFunc(fn actionFunc) cli.ActionFunc {
+	return func(c *cli.Context) error {
+		cfg := config.New(c)
+		if c.Bool("show-config") {
+			cfg.Print()
+		}
+		return fn(cfg)
 	}
 }

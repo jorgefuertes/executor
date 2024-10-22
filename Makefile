@@ -17,11 +17,14 @@ test:
 
 run-which:
 	@go run main.go which -c ls
-
+	@echo "Running silently OK"
+	@go run main.go which --silent -c ls
+	@echo "Running silently FAIL"
+	@go run main.go which --silent -c non-existing-command
 
 run-exe:
 	@for style in $(STYLE_LIST); do \
-		go run main.go run --desc "Execution test" -st $$style -c "sleep 2; echo \"!Hola, Mundo!\""; \
+		go run main.go run --desc "Execution test" -st $$style -c "sleep 2; echo \"¡Hola, Mundo!\""; \
 	done
 	@go run main.go run --desc "Not interactive and no color test" --nc -st bar -c "sleep 1; echo \"!Hola, Mundo!\""
 
@@ -30,6 +33,15 @@ run-long:
 
 run-help:
 	@go run main.go run --help
+
+run-show-env:
+	@go run main.go run -se --desc "Show env" -c "echo '¡Hola, Mundo!'"
+
+run-output:
+	@echo
+	@go run main.go run --desc "No error, show output" -so -c "sleep 1; echo '¡Hola, Mundo!'; echo 'No errors' >&2"
+	@echo
+	@go run main.go run --desc "Error, show output" -so -c "sleep 1; echo '¡Hola, Mundo!'; echo 'This is an error' >&2; exit 1"
 
 build: clean lint test
 	@mkdir -p $(BUILD_DIR)

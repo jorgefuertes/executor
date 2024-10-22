@@ -1,7 +1,6 @@
 package terminal
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 
@@ -18,8 +17,10 @@ const (
 	ErrorLevel
 )
 
-var interactive bool
-var nocolor bool
+var (
+	interactive bool
+	nocolor     bool
+)
 
 func init() {
 	interactive = isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd())
@@ -101,22 +102,6 @@ func TableTile(title string) {
 	fmt.Print("  " + title + ":  ")
 	SetColor(color.Reset)
 	fmt.Println()
-}
-
-func ShowOutput(level Level, title string, out bytes.Buffer) {
-	if out.Len() == 0 {
-		fmt.Println()
-		Line(level, title+": Empty")
-		fmt.Println()
-
-		return
-	}
-
-	fmt.Println()
-	Line(level, "---[BEGIN "+title+"]---")
-	fmt.Println()
-	fmt.Println(out.String())
-	Line(level, "---[END "+title+"]----")
 }
 
 func SavePos() {
