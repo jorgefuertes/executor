@@ -6,33 +6,36 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func getEnv(envFileName string, recursionLevels int) (map[string]string, error) {
+func getEnv(envFileName string, path string, recursionLevels int) (map[string]string, error) {
 	var mainEnv map[string]string
 	var err error
 
-	if envFileName == "none" {
-		return mainEnv, nil
-	}
-
-	path, err := os.Getwd()
+	startPath, err := os.Getwd()
 	if err != nil {
 		return nil, err
 	}
 	defer func() {
-		_ = os.Chdir(path)
+		_ = os.Chdir(startPath)
 	}()
 
-	for i := 0; i < recursionLevels; i++ {
+	if path == "" {
+		path = startPath
+	}
+
+	if err := os.Chdir(path); err != nil {
+		return nil, err
+	}
+
+	for i := 0; i <= recursionLevels; i++ {
 		mainEnv, err = godotenv.Read(envFileName)
 		if err == nil {
-			break
+			return mainEnv, nil
 		}
+
 		if err := os.Chdir(".."); err != nil {
 			return nil, err
 		}
-
-		continue
 	}
 
-	return mainEnv, err
+	return nil, ErrEnvNotFound
 }

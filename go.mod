@@ -1,6 +1,6 @@
 module executor
 
-go 1.21.6
+go 1.23.1
 
 require github.com/urfave/cli/v2 v2.27.5
 

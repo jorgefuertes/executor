@@ -91,7 +91,7 @@ func main() {
 					&cli.StringFlag{
 						Name:    "spinner-style",
 						Aliases: []string{"st"},
-						Usage:   "Spinner style: dots, arrow, star, circle, square, square-star, line, line-star, bar, o",
+						Usage:   "Spinner style: " + terminal.SpinnerStylesString(),
 						Value:   "dots",
 					},
 					&cli.BoolFlag{

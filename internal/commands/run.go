@@ -17,7 +17,7 @@ func Run(cfg *config.Config) error {
 		return ErrEmptyCommand
 	}
 
-	mainEnv, err := getEnv(cfg.EnvFileName, cfg.EnvRecurseLevels)
+	mainEnv, err := getEnv(cfg.EnvFileName, "", cfg.EnvRecurseLevels)
 	if err != nil {
 		return err
 	}

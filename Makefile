@@ -7,12 +7,14 @@ OS_LIST := linux darwin windows
 ARCH_LIST := amd64 386 arm arm64
 INSTALL_FILE := ~/bin/executor
 EXE_NAME := executor
-STYLE_LIST := dots o arrow star circle square square-star line line-star bar
+STYLE_LIST := arrow star circle bullet line dots square bar o
 
 version:
 	@echo $(VERSION)
 
 test:
+	go test ./...
+test-v:
 	go test -v ./...
 
 run-which:

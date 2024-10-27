@@ -10,44 +10,31 @@ import (
 	"github.com/fatih/color"
 )
 
-const spinnerDelayMilliseconds = 100
+const spinnerDelayMilliseconds = 50
 
 type Progress struct {
+	spinner    spinner
 	spin       int
 	start      time.Time
 	ctx        context.Context
 	cancel     context.CancelFunc
-	chars      []string
 	printedLen int
-}
-
-var spinners = map[string][]string{
-	"dots":        {"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧"},
-	"arrow":       {"←", "↖", "↑", "↗", "→", "↘", "↓", "↙"},
-	"star":        {"★", "☆", "★", "☆", "★", "☆", "★", "☆"},
-	"circle":      {"◐", "◓", "◑", "◒", "◐", "◓", "◑", "◒"},
-	"square":      {"▖", "▘", "▝", "▗", "▖", "▘", "▝", "▗"},
-	"square-star": {"▌", "▞", "▛", "▙", "▟", "█", "▐", "█"},
-	"line":        {"⎺", "⎻", "⎼", "⎽", "⎼", "⎻", "⎺", "⎼"},
-	"line-star":   {"⎸", "⎹", "⎺", "⎻", "⎼", "⎽", "⎾", "⎿"},
-	"bar":         {`|`, `/`, `-`, `\`, `|`, `/`, `-`, `\`},
-	"o":           {".", "o", "O", "0", "O", "o", ".", " "},
 }
 
 func NewProgress(style string) *Progress {
 	ctx, cancel := context.WithCancel(context.Background())
 
-	chars, ok := spinners[style]
+	s, ok := spinners[style]
 	if !ok {
-		chars = spinners["dots"]
+		s = spinners["dots"]
 	}
 
 	return &Progress{
+		spinner:    s,
 		spin:       0,
 		start:      time.Now(),
 		ctx:        ctx,
 		cancel:     cancel,
-		chars:      chars,
 		printedLen: 0,
 	}
 }
@@ -72,19 +59,17 @@ func (p *Progress) elapsed() string {
 }
 
 func (p *Progress) print() {
-
 	if !IsInteractive() {
 		return
 	}
 
 	SavePos()
 	et := p.elapsed()
-	spin := p.chars[p.spin]
-	p.printedLen = len(et + " " + spin)
+	p.printedLen = len(et + " " + p.spinner.chars[p.spin])
 	SetColor(color.FgCyan)
 	fmt.Print(et + " ")
 	SetColor(color.FgYellow)
-	fmt.Print(spin)
+	fmt.Print(p.spinner.chars[p.spin])
 	ResetColor()
 	RestorePos()
 }
@@ -107,11 +92,11 @@ func (p *Progress) Start() {
 			}
 
 			p.spin++
-			if p.spin > 7 {
+			if p.spin > len(p.spinner.chars)-1 {
 				p.spin = 0
 			}
 			p.print()
-			time.Sleep(spinnerDelayMilliseconds * time.Millisecond)
+			time.Sleep(p.spinner.delay)
 		}
 	}()
 }
