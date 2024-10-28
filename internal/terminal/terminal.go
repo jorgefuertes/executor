@@ -3,9 +3,11 @@ package terminal
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/mattn/go-isatty"
+	"golang.org/x/term"
 )
 
 type Level int
@@ -15,15 +17,31 @@ const (
 	InfoLevel
 	WarnLevel
 	ErrorLevel
+	defaultCols  = 80
+	defaultLines = 24
 )
 
 var (
 	interactive bool
 	nocolor     bool
+	cols        int
 )
 
 func init() {
 	interactive = isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd())
+
+	// terminal columns
+	cols = defaultCols
+	if !IsInteractive() {
+		return
+	}
+
+	c, _, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil {
+		return
+	}
+
+	cols = c
 }
 
 func IsInteractive() bool {
@@ -67,6 +85,13 @@ func Action(level Level, msg string) {
 	SetColor(color.Reset)
 }
 
+func ActionNoColon(level Level, msg string) {
+	caret(level)
+	SetColor(color.FgWhite)
+	fmt.Print(msg)
+	SetColor(color.Reset)
+}
+
 func Error(err error) {
 	if err == nil {
 		return
@@ -85,15 +110,25 @@ func Error(err error) {
 }
 
 func Result(ok bool) {
+	if !IsInteractive() {
+		if ok {
+			fmt.Println(" OK")
+		} else {
+			fmt.Println(" FAIL")
+		}
+
+		return
+	}
+
 	if ok {
 		SetColor(color.BgHiGreen, color.FgHiWhite)
-		fmt.Print(" OK ")
+		fmt.Print("  OK  ")
 	} else {
 		SetColor(color.BgHiRed, color.FgHiWhite)
 		fmt.Print(" FAIL ")
 	}
 
-	SetColor(color.Reset)
+	ResetColor()
 	fmt.Println()
 }
 
@@ -134,4 +169,10 @@ func ShowCursor() {
 	}
 
 	fmt.Print("\033[?25h")
+}
+
+func DashedLine(fromCol int) {
+	SetColor(color.FgHiWhite)
+	fmt.Print(strings.Repeat("_", cols-fromCol-6))
+	ResetColor()
 }

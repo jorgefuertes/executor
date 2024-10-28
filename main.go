@@ -7,6 +7,7 @@ import (
 	"executor/internal/commands"
 	"executor/internal/config"
 	"executor/internal/terminal"
+	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli/v2"
 )
 
@@ -19,6 +20,8 @@ func (o Output) String() string {
 const (
 	whichCommandName = "which"
 	runCommandName   = "run"
+	portCommandName  = "port"
+	webCommandName   = "web"
 )
 
 var version string
@@ -136,6 +139,37 @@ func main() {
 				},
 				Action: newActionFunc(commands.Run),
 			},
+			{
+				Name:  portCommandName,
+				Usage: "Check if a port is open",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:     "desc",
+						Aliases:  []string{"d"},
+						Usage:    "Port check description",
+						Required: true,
+					},
+					&cli.StringFlag{Name: "host", Aliases: []string{"i"}, Usage: "Host to check", Value: "localhost"},
+					&cli.IntFlag{Name: "port", Aliases: []string{"p"}, Usage: "Port to check", Required: true},
+					&cli.IntFlag{Name: "timeout", Aliases: []string{"t"}, Usage: "Timeout in seconds", Value: 5},
+				},
+				Action: newActionFunc(commands.Port),
+			},
+			{
+				Name:  webCommandName,
+				Usage: "Check if a web page is running and responding successfully",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:     "desc",
+						Aliases:  []string{"d"},
+						Usage:    "URL check description",
+						Required: true,
+					},
+					&cli.StringFlag{Name: "url", Aliases: []string{"u"}, Usage: "URL to check", Required: true},
+					&cli.IntFlag{Name: "timeout", Aliases: []string{"t"}, Usage: "Timeout in seconds", Value: 5},
+				},
+				Action: newActionFunc(commands.Web),
+			},
 		},
 	}
 
@@ -154,8 +188,20 @@ func newActionFunc(fn actionFunc) cli.ActionFunc {
 	return func(c *cli.Context) error {
 		cfg := config.New(c)
 		if c.Bool("show-config") {
-			cfg.Print()
+			fmt.Println()
+			terminal.TableTile("Configuration")
+			table := tablewriter.NewWriter(os.Stdout)
+			table.SetHeader([]string{"Flag", "Value"})
+			for _, f := range c.FlagNames() {
+				table.Rich(
+					[]string{f, c.String(f)},
+					[]tablewriter.Colors{{tablewriter.FgCyanColor}, {tablewriter.FgHiYellowColor}},
+				)
+			}
+			table.Render()
+			fmt.Println()
 		}
+
 		return fn(cfg)
 	}
 }

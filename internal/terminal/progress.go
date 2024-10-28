@@ -4,24 +4,22 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"strings"
 	"time"
 
 	"github.com/fatih/color"
 )
 
-const spinnerDelayMilliseconds = 50
-
 type Progress struct {
+	title      string
 	spinner    spinner
 	spin       int
 	start      time.Time
+	printedLen int
 	ctx        context.Context
 	cancel     context.CancelFunc
-	printedLen int
 }
 
-func NewProgress(style string) *Progress {
+func NewProgress(title, style string) *Progress {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	s, ok := spinners[style]
@@ -30,12 +28,13 @@ func NewProgress(style string) *Progress {
 	}
 
 	return &Progress{
+		title:      title,
 		spinner:    s,
 		spin:       0,
 		start:      time.Now(),
+		printedLen: 0,
 		ctx:        ctx,
 		cancel:     cancel,
-		printedLen: 0,
 	}
 }
 
@@ -59,19 +58,25 @@ func (p *Progress) elapsed() string {
 }
 
 func (p *Progress) print() {
-	if !IsInteractive() {
-		return
+	fmt.Print("\r")
+	Action(InfoLevel, p.title)
+	et := p.elapsed()
+	p.printedLen = len(p.title) + 4 + len(et)
+	if p.ctx.Err() == nil {
+		SetColor(color.FgHiBlue)
+		fmt.Print(et + " ")
+		p.printedLen++
+	} else {
+		SetColor(color.FgCyan)
+		fmt.Print(et)
+	}
+	if p.ctx.Err() == nil {
+		SetColor(color.FgYellow)
+		fmt.Print(p.spinner.chars[p.spin])
+		p.printedLen += len(p.spinner.chars[p.spin])
 	}
 
-	SavePos()
-	et := p.elapsed()
-	p.printedLen = len(et + " " + p.spinner.chars[p.spin])
-	SetColor(color.FgCyan)
-	fmt.Print(et + " ")
-	SetColor(color.FgYellow)
-	fmt.Print(p.spinner.chars[p.spin])
 	ResetColor()
-	RestorePos()
 }
 
 func (p *Progress) Start() {
@@ -101,17 +106,13 @@ func (p *Progress) Start() {
 	}()
 }
 
-func (p *Progress) Stop() {
+func (p *Progress) Stop(ok bool) {
 	p.cancel()
-
+	p.print()
 	if IsInteractive() {
-		SavePos()
-		fmt.Print(strings.Repeat(" ", p.printedLen+1))
-		RestorePos()
-		SetColor(color.FgHiBlue)
+		DashedLine(p.printedLen)
 	}
 
-	fmt.Print(p.elapsed() + " ")
-	SetColor(color.Reset)
+	Result(ok)
 	ShowCursor()
 }

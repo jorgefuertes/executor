@@ -42,13 +42,10 @@ func Run(cfg *config.Config) error {
 		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", k, v))
 	}
 
-	terminal.Action(terminal.InfoLevel, cfg.Desc)
-
-	progress := terminal.NewProgress(cfg.Style)
+	progress := terminal.NewProgress(cfg.Desc, cfg.Style)
 	progress.Start()
 	o, err := cmd.CombinedOutput()
-	progress.Stop()
-	terminal.Result(err == nil)
+	progress.Stop(err == nil)
 
 	if err != nil && cfg.ShowAnyOutput() {
 		terminal.Line(terminal.WarnLevel, "Failed command: "+cfg.Command)

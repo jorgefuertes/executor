@@ -7,7 +7,7 @@ OS_LIST := linux darwin windows
 ARCH_LIST := amd64 386 arm arm64
 INSTALL_FILE := ~/bin/executor
 EXE_NAME := executor
-STYLE_LIST := arrow star circle bullet line dots square bar o
+STYLE_LIST := dots outline blink cursor o arrow star circle bullet line square bar
 
 version:
 	@echo $(VERSION)
@@ -16,6 +16,9 @@ test:
 	go test ./...
 test-v:
 	go test -v ./...
+
+run:
+	@go run main.go run --desc "Long run test" -c "sleep 2; echo \"!Hola, Mundo!\""; \
 
 run-which:
 	@go run main.go which -c ls
@@ -26,7 +29,7 @@ run-which:
 
 run-exe:
 	@for style in $(STYLE_LIST); do \
-		go run main.go run --desc "Execution test" -st $$style -c "sleep 2; echo \"¡Hola, Mundo!\""; \
+		go run main.go run --desc "Execution test $$style" -st $$style -c "sleep 2; echo \"¡Hola, Mundo!\""; \
 	done
 	@go run main.go run --desc "Not interactive and no color test" --nc -st bar -c "sleep 1; echo \"!Hola, Mundo!\""
 

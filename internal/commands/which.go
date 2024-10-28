@@ -50,7 +50,9 @@ func Which(cfg *config.Config) error {
 	}
 
 	terminal.SetNoColor(cfg.NoColor)
-	terminal.Action(terminal.InfoLevel, "Looking for "+cfg.Command)
+	desc := "Looking for " + cfg.Command
+	terminal.ActionNoColon(terminal.InfoLevel, desc)
+	terminal.DashedLine(len(desc) + 2)
 	terminal.Result(ok)
 
 	if !ok {

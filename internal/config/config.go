@@ -1,11 +1,8 @@
 package config
 
 import (
-	"fmt"
-	"os"
+	"time"
 
-	"executor/internal/terminal"
-	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli/v2"
 )
 
@@ -21,6 +18,10 @@ type Config struct {
 	NotFoundMsg       string
 	Desc              string
 	Command           string
+	Host              string
+	Port              int
+	URL               string
+	Timeout           time.Duration
 }
 
 func New(c *cli.Context) *Config {
@@ -36,26 +37,11 @@ func New(c *cli.Context) *Config {
 		NotFoundMsg:       c.String("not-found-msg"),
 		Desc:              c.String("desc"),
 		Command:           c.String("cmd"),
+		Host:              c.String("host"),
+		Port:              c.Int("port"),
+		URL:               c.String("url"),
+		Timeout:           time.Duration(c.Int("timeout")) * time.Second,
 	}
-}
-
-func (c Config) Print() {
-	terminal.TableTile("Config")
-	t := tablewriter.NewWriter(os.Stdout)
-	t.AppendBulk([][]string{
-		{"EnvFileName", c.EnvFileName},
-		{"EnvRecurseLevels", fmt.Sprintf("%d", c.EnvRecurseLevels)},
-		{"ShowEnv", fmt.Sprintf("%t", c.ShowEnv)},
-		{"Style", c.Style},
-		{"NoColor", fmt.Sprintf("%t", c.NoColor)},
-		{"ShowOutput", fmt.Sprintf("%t", c.ShowOutput)},
-		{"ShowOutputOnError", fmt.Sprintf("%t", c.ShowOutputOnError)},
-		{"Silent", fmt.Sprintf("%t", c.Silent)},
-		{"NotFoundMsg", c.NotFoundMsg},
-		{"Desc", c.Desc},
-		{"Command", c.Command},
-	})
-	t.Render()
 }
 
 func (c Config) ShowAnyOutput() bool {
