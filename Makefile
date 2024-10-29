@@ -7,7 +7,7 @@ OS_LIST := linux darwin windows
 ARCH_LIST := amd64 386 arm arm64
 INSTALL_FILE := ~/bin/executor
 EXE_NAME := executor
-STYLE_LIST := dots outline blink cursor o arrow star circle bullet line square bar
+STYLE_LIST := line blink arrow star circle square outline bar o cursor dots
 
 version:
 	@echo $(VERSION)
