@@ -7,7 +7,6 @@ import (
 	"executor/internal/commands"
 	"executor/internal/config"
 	"executor/internal/terminal"
-	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli/v2"
 )
 
@@ -173,6 +172,11 @@ func main() {
 		},
 	}
 
+	defer func() {
+		terminal.ResetColor()
+		terminal.ShowCursor()
+	}()
+
 	err := app.Run(os.Args)
 	if err != nil {
 		fmt.Println()
@@ -187,19 +191,9 @@ type actionFunc func(cfg *config.Config) error
 func newActionFunc(fn actionFunc) cli.ActionFunc {
 	return func(c *cli.Context) error {
 		cfg := config.New(c)
+
 		if c.Bool("show-config") {
-			fmt.Println()
-			terminal.TableTile("Configuration")
-			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Flag", "Value"})
-			for _, f := range c.FlagNames() {
-				table.Rich(
-					[]string{f, c.String(f)},
-					[]tablewriter.Colors{{tablewriter.FgCyanColor}, {tablewriter.FgHiYellowColor}},
-				)
-			}
-			table.Render()
-			fmt.Println()
+			cfg.Print()
 		}
 
 		return fn(cfg)

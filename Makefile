@@ -34,7 +34,7 @@ run-exe:
 	@go run main.go run --desc "Not interactive and no color test" --nc -st bar -c "sleep 1; echo \"!Hola, Mundo!\""
 
 run-long:
-	@go run main.go run --desc "Long run test" -c "sleep 63; echo \"!Hola, Mundo!\""; \
+	@go run main.go run --desc "Long run test" -c "sleep 30; echo \"Hola 30 seg\"; sleep 33; echo \"!Hola, Mundo!\""; \
 
 run-help:
 	@go run main.go run --help
@@ -75,15 +75,22 @@ release: clean lint test
 	@for os in $(OS_LIST); do \
 		for arch in $(ARCH_LIST); do \
 			f="$(EXE_NAME)"; \
-			tar_name="$(EXE_NAME)_$${os}-$${arch}_$(subst .,_,${VERSION}).tar.bz"; \
+			crunched_name="$(EXE_NAME)_$${os}-$${arch}_$(subst .,_,${VERSION}).tar.bz"; \
 			if [ "$$os" = "windows" ]; then \
 				f="$$f.exe"; \
+				crunched_name="$(EXE_NAME)_$${os}-$${arch}_$(subst .,_,${VERSION}).zip"; \
 			fi; \
 			if [[ "$$os/$$arch" != "darwin/arm" && "$$os/$$arch" != "darwin/386" ]]; then \
 				echo "Building $$os/$$arch --> $$f"; \
 				GOOS=$$os GOARCH=$$arch go build -ldflags="-s -w -X main.version=$(VERSION)" -o $(RELEASE_DIR)/$$f $(SOURCE_FILE); \
-				echo "Compressing $$f --> $$tar_name"; \
-				tar -C $(RELEASE_DIR) -cjf $(RELEASE_DIR)/$$tar_name $$f; \
+				echo "Compressing $$f --> $$crunched_name"; \
+				if [ "$$os" = "windows" ]; then \
+					pushd $(RELEASE_DIR); \
+					zip -r $$crunched_name $$f; \
+					popd; \
+				else \
+					tar -C $(RELEASE_DIR) -cjf $(RELEASE_DIR)/$$crunched_name $$f; \
+				fi; \
 				rm $(RELEASE_DIR)/$$f; \
 			fi; \
 		done; \

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"os/signal"
+	"syscall"
 
 	"executor/internal/config"
 	"executor/internal/terminal"
@@ -12,6 +14,8 @@ import (
 
 func Run(cfg *config.Config) error {
 	terminal.SetNoColor(cfg.NoColor)
+	defer terminal.ResetColor()
+	defer terminal.ShowCursor()
 
 	if len(cfg.Command) == 0 {
 		return ErrEmptyCommand
@@ -44,6 +48,18 @@ func Run(cfg *config.Config) error {
 
 	progress := terminal.NewProgress(cfg.Desc, cfg.Style)
 	progress.Start()
+
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, os.Interrupt, syscall.SIGTERM, syscall.SIGABRT)
+
+	go func() {
+		<-ch
+		err := cmd.Process.Signal(syscall.SIGTERM)
+		if err != nil {
+			terminal.Error(err)
+		}
+	}()
+
 	o, err := cmd.CombinedOutput()
 	progress.Stop(err == nil)
 
