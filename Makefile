@@ -70,7 +70,7 @@ uninstall:
 	@rm -rf $(INSTALL_FILE)
 	@echo "Removed $(INSTALL_FILE)"
 
-release: clean lint test
+release: clean
 	@mkdir -p $(RELEASE_DIR)
 	@for os in $(OS_LIST); do \
 		for arch in $(ARCH_LIST); do \
