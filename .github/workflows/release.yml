@@ -47,7 +47,7 @@ jobs:
         run: |
           echo "Repository Name: $REPO_NAME"
           echo "Tag Name: $TAG_NAME"
-          git archive --format tar.bz --prefix="${REPO_NAME}/" --output "${REPO_NAME}-${TAG_NAME}.zip" HEAD
+          git archive --format tar.gz --prefix="${REPO_NAME}/" --output "${REPO_NAME}-${TAG_NAME}.zip" HEAD
           echo "REPO_NAME=${REPO_NAME}" >> $GITHUB_ENV
           echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV
 
