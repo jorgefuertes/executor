@@ -6,7 +6,7 @@ on:
 
   push:
     tags:
-      - "*"
+      - v*.*.*
 
 name: Create and Publish release
 
@@ -14,13 +14,23 @@ jobs:
   build:
     name: Create Release
     runs-on: ubuntu-latest
+
     steps:
       - name: Set up Go
         id: go
         uses: actions/setup-go@v3
         with:
           go-version: 1.23
-    
+
+      - name: Update apt
+        run: apt update
+
+      - name: Instal git
+        run: apt install -y git
+
+      - name: Install make
+        run: apt install -y make
+
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -32,28 +42,22 @@ jobs:
           repo_name="${repo_fullname##*/}"
           echo "REPO_NAME=${repo_name}" >> $GITHUB_ENV
 
-      - name: Compile
-        id: compile
-        run: |
-          make release
-
       - name: Get Tag Name
         id: get_tag_name
         run: |
-          # Extract tag or branch name from GITHUB_REF
-          tag_name="${{ github.ref }}"
-          tag_name="${tag_name#refs/tags/}"
+          # Extract tag from repo
+          tag_name="${{ github.ref_name }}"
           echo "TAG_NAME=${tag_name}" >> $GITHUB_ENV
 
       - name: Create Release
         run: |
-          echo "Repository Name: $REPO_NAME"
-          echo "Tag Name: $TAG_NAME"
+          echo "[INFO] REPO_NAME=${REPO_NAME} TAG_NAME=${TAG_NAME}"
           git archive --format tar.gz --prefix="${REPO_NAME}/" --output "${REPO_NAME}-${TAG_NAME}.tar.gz" HEAD
           echo "REPO_NAME=${REPO_NAME}" >> $GITHUB_ENV
           echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV
 
       - name: Upload Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
+          token: ${{ secrets.PUBLISH_TOKEN }}
           files: "${{ github.event.repository.name }}-${{ steps.get_tag_name.outputs.TAG_NAME }}.tar.gz"
