@@ -96,10 +96,3 @@ release: clean lint test
 		done; \
 	done
 	@ls -sSFhC1 release
-
-release-push:
-	@for crunched_name in $$(ls -sSFhC1 release); do \
-		echo "Pushing $$crunched_name"; \
-		gh release upload $VERSION $$crunched_name; \
-	done
-	@echo "Released"
