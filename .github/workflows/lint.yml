@@ -1,4 +1,4 @@
-name: ci
+name: lint
 
 permissions:
   contents: read
@@ -8,8 +8,8 @@ on:
   - pull_request
 
 jobs:
-  ci:
-    name: Run ci
+  lint:
+    name: Run linters
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -27,3 +27,6 @@ jobs:
       with:
         version: latest
         install-go: false
+    - uses: golangci/golangci-lint-action@v3
+      with:
+        version: latest

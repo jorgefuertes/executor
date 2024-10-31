@@ -1,4 +1,4 @@
-name: Create and Publish release
+name: release
 
 permissions:
   contents: read
@@ -11,8 +11,8 @@ on:
       - v*.*.*
 
 jobs:
-  build:
-    name: Create Release
+  release:
+    name: Create and Publish Release
     runs-on: ubuntu-latest
 
     steps:
