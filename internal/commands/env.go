@@ -12,7 +12,7 @@ func getEnv(envFileName string, path string, recursionLevels int) (map[string]st
 
 	startPath, err := os.Getwd()
 	if err != nil {
-		return nil, err
+		return mainEnv, err
 	}
 	defer func() {
 		_ = os.Chdir(startPath)
@@ -23,7 +23,7 @@ func getEnv(envFileName string, path string, recursionLevels int) (map[string]st
 	}
 
 	if err := os.Chdir(path); err != nil {
-		return nil, err
+		return mainEnv, err
 	}
 
 	for i := 0; i <= recursionLevels; i++ {
@@ -33,9 +33,9 @@ func getEnv(envFileName string, path string, recursionLevels int) (map[string]st
 		}
 
 		if err := os.Chdir(".."); err != nil {
-			return nil, err
+			return mainEnv, err
 		}
 	}
 
-	return nil, ErrEnvNotFound
+	return mainEnv, ErrEnvNotFound
 }

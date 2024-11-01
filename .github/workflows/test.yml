@@ -6,7 +6,7 @@ permissions:
 on:
   - push
   - pull_request
-  
+
 jobs:
   test:
     name: Test the code

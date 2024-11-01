@@ -9,6 +9,7 @@ import (
 
 	"executor/internal/config"
 	"executor/internal/terminal"
+
 	"github.com/olekukonko/tablewriter"
 )
 
@@ -21,10 +22,7 @@ func Run(cfg *config.Config) error {
 		return ErrEmptyCommand
 	}
 
-	mainEnv, err := getEnv(cfg.EnvFileName, "", cfg.EnvRecurseLevels)
-	if err != nil {
-		return err
-	}
+	mainEnv, _ := getEnv(cfg.EnvFileName, "", cfg.EnvRecurseLevels)
 
 	if cfg.ShowEnv {
 		fmt.Println()
@@ -70,7 +68,7 @@ func Run(cfg *config.Config) error {
 	if cfg.ShowOutput || (err != nil && cfg.ShowOutputOnError) {
 		fmt.Println()
 		terminal.Line(terminal.WarnLevel, "Command output:")
-		fmt.Printf("OUTPUT: %s\n", string(o))
+		fmt.Print(string(o))
 	}
 
 	return err
