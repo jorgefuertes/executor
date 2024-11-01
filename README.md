@@ -48,14 +48,4 @@ You can use executor, at the moment, to:
 - Check if a web page is responding successfully (`web`).
 
 Check the included help `--help` for more info.
-## English usage check
 
-Upon checking this document's English, there are a few corrections to note:
-
-- "This is an small program" should be "This is a small program"
-- "giving a better and pro looking" should be "giving it a better and professional look"
-- "showing it on error or as instructed" should be "showing output on error or as instructed"
-- "acts as a simple log" could be "functions as a simple log"
-- "reponding successfuly" should be "responding successfully"
-
-Overall the document is quite readable with only minor grammatical improvements needed.
