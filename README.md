@@ -16,7 +16,7 @@ Automatic detection of terminal type, acts as a simple log without colors or spi
 
 ## Demo
 
-![demo](./assets/demo.mov)
+![Demo](./assets/demo.gif)
 
 ## Quick usage
 
