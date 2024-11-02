@@ -6,6 +6,8 @@ Run commands in a fancy way.
 
 This is a small program just made to run any shell commands with visual feedback, timing and some other features, giving it a better and professional look.
 
+This is not intended to be an alternative to `make` or `task`, is just a complement. When your `make` output is too much to understand something, `executor` helps you to see, in a single look, if everithing goes ok.
+
 ### Output shading
 
 Executor hides the standard and error output, showing it on error or as instructed via command line flags.
@@ -48,4 +50,3 @@ You can use executor, at the moment, to:
 - Check if a web page is responding successfully (`web`).
 
 Check the included help `--help` for more info.
-
