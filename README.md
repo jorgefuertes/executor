@@ -53,5 +53,5 @@ Check the included help `--help` for more info.
 
 ## Authors
 
-- Idea from Marcos Gómez.
+- Idea: Marcos Gómez.
 - Main developer: [Jorge Fuertes AKA Queru](https://github.com/jorgefuertes).

@@ -42,10 +42,38 @@ jobs:
 
       - name: Create Release
         run: |
-          echo "[INFO] REPO_NAME=${REPO_NAME} TAG_NAME=${TAG_NAME}"
           git archive --format tar.gz --prefix="${REPO_NAME}/" --output "${REPO_NAME}-${TAG_NAME}.tar.gz" HEAD
           echo "REPO_NAME=${REPO_NAME}" >> $GITHUB_ENV
           echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV
+
+      - name: Compilation
+        run: |
+          for os in linux darwin windows; do
+            for arch in amd64 386 arm arm64; do
+              # Skip unsupported darwin combinations
+              if [[ "$os/$arch" != "darwin/arm" && "$os/$arch" != "darwin/386" ]]; then
+                executable="executor"
+                archive_name="executor_${os}-${arch}_${VERSION//./_}"
+                # .exe and zip for windows, tar.gz for others
+                if [ "$os" = "windows" ]; then
+                  executable="${executable}.exe"
+                  archive_name="${archive_name}.zip"
+                else
+                  archive_name="${archive_name}.tar.gz"
+                fi
+                  echo "Building $os/$arch --> $executable"
+                  GOOS=$os GOARCH=$arch go build -ldflags="-s -w -X main.version=${VERSION}" -o "release/$executable" main.go
+                  echo "Compressing $executable --> $archive_name"
+                  if [ "$os" = "windows" ]; then
+                    (cd release && zip -r "$archive_name" "$executable")
+                  else
+                    tar -C release -cjf "release/$archive_name" "$executable"
+                  fi
+
+                  rm "release/$executable"
+                fi
+              done
+            done
 
       - name: Upload Release
         uses: softprops/action-gh-release@v2
