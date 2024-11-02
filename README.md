@@ -50,3 +50,8 @@ You can use executor, at the moment, to:
 - Check if a web page is responding successfully (`web`).
 
 Check the included help `--help` for more info.
+
+## Authors
+
+- Idea from Marcos Gómez.
+- Main developer: [Jorge Fuertes AKA Queru](https://github.com/jorgefuertes).
