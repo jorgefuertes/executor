@@ -63,8 +63,15 @@ TMP_DIR=$(mktemp -d)
 cd "$TMP_DIR"
 
 # download
-echo "Downloading $FILENAME..."
-curl -L -o "$FILENAME" "$DOWNLOAD_URL"
+echo -n "Downloading $FILENAME..."
+curl -Lso "$FILENAME" "$DOWNLOAD_URL" &> /dev/null
+if [[ $? -ne 0 ]]
+then
+    echo -e "${RED}FAILED${NC}"
+    exit 1
+else
+    echo -e "${GREEN}OK${NC}"
+fi
 
 # decrunch
 echo "Extracting..."
@@ -75,9 +82,9 @@ else
 fi
 
 # install
-echo "Installing to /usr/local/bin"
+echo "Installing to /usr/local/bin, may I need sudo password..."
 sudo mv executor /usr/local/bin/
-echo "Giving execution permission"
+echo "Giving execution permission, may I need sudo password..."
 sudo chmod +x /usr/local/bin/executor
 
 # clean

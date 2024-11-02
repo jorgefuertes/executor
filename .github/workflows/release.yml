@@ -66,7 +66,7 @@ jobs:
                 else
                   archive_name="${archive_name}.tar.gz"
                 fi
-                echo "Building $os/$arch --> $executable"
+                echo "Building $os/$arch --> $executable ${TAG_NAME}"
                 GOOS=$os GOARCH=$arch go build -ldflags="-s -w -X main.version=${TAG_NAME}" -o "release/$executable" main.go
                 echo "Compressing $executable --> $archive_name"
                 if [ "$os" = "windows" ]; then

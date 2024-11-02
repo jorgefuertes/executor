@@ -5,7 +5,7 @@ BUILD_DIR := build
 RELEASE_DIR := release
 OS_LIST := linux darwin windows
 ARCH_LIST := amd64 386 arm arm64
-INSTALL_FILE := ~/bin/executor
+INSTALL_FILE := /usr/local/bin/executor
 EXE_NAME := executor
 STYLE_LIST := line blink arrow star circle square outline bar o cursor dots
 
