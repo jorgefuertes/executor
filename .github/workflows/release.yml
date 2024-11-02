@@ -46,8 +46,9 @@ jobs:
           echo "REPO_NAME=${REPO_NAME}" >> $GITHUB_ENV
           echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV
 
-      - name: Compilation
+      - name: Compile
         run: |
+          mkdir -p release
           for os in linux darwin windows; do
             for arch in amd64 386 arm arm64; do
               # Skip unsupported darwin combinations
@@ -61,22 +62,24 @@ jobs:
                 else
                   archive_name="${archive_name}.tar.gz"
                 fi
-                  echo "Building $os/$arch --> $executable"
-                  GOOS=$os GOARCH=$arch go build -ldflags="-s -w -X main.version=${VERSION}" -o "release/$executable" main.go
-                  echo "Compressing $executable --> $archive_name"
-                  if [ "$os" = "windows" ]; then
-                    (cd release && zip -r "$archive_name" "$executable")
-                  else
-                    tar -C release -cjf "release/$archive_name" "$executable"
-                  fi
-
-                  rm "release/$executable"
+                echo "Building $os/$arch --> $executable"
+                GOOS=$os GOARCH=$arch go build -ldflags="-s -w -X main.version=${VERSION}" -o "release/$executable" main.go
+                echo "Compressing $executable --> $archive_name"
+                if [ "$os" = "windows" ]; then
+                  (cd release && zip -r "$archive_name" "$executable")
+                else
+                  tar -C release -cjf "release/$archive_name" "$executable"
                 fi
-              done
+
+                rm "release/$executable"
+              fi
             done
+          done
 
       - name: Upload Release
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.PUBLISH_TOKEN }}
-          files: "${{ github.event.repository.name }}-${{ steps.get_tag_name.outputs.TAG_NAME }}.tar.gz"
+          files: |
+            ${{ github.event.repository.name }}-${{ steps.get_tag_name.outputs.TAG_NAME }}.tar.gz
+            release/*
