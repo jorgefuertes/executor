@@ -66,7 +66,7 @@ jobs:
                 if [ "$os" = "windows" ]; then
                   (cd release && zip -r "$archive_name" "$executable")
                 else
-                  tar -C release -cjf "release/$archive_name" "$executable"
+                  tar -C release -czf "release/$archive_name" "$executable"
                 fi
 
                 rm "release/$executable"
