@@ -27,14 +27,20 @@ run-which:
 	@echo "Running silently FAIL"
 	@go run main.go which --silent -c non-existing-command
 
-run-exe:
+demo:
 	@for style in $(STYLE_LIST); do \
-		go run main.go run --desc "Execution test $$style" -st $$style -c "sleep 2; echo \"¡Hola, Mundo!\""; \
+		DESC="Making something with '$$style' style"; \
+		SECS=$$(($${RANDOM} % 3 + 1)); \
+		echo "\033[90m#> executor run --desc \"$${DESC}\" -st $$style -c \"sleep $${SECS}; echo Hello;\"\033[0m" | pv -qL 40; \
+		go run main.go run --desc "$${DESC}" -st $$style -c "sleep $${SECS}; echo Hello"; \
 	done
-	@go run main.go run --desc "Not interactive and no color test" --nc -st bar -c "sleep 1; echo \"!Hola, Mundo!\""
+	@echo "\033[90mexecutor run --desc \"Not interactive and no color test\" --nc -st bar -c \"sleep 1; echo Hello\"\033[0m" | pv -qL 40
+	@go run main.go run --desc "Not interactive and no color test" --nc -st bar -c "sleep 1; echo Hello"
+	@echo "\033[90m#> executor which -st $$style -c \"ls\"\033[0m" | pv -qL 40;
+	@go run main.go which -c "ls"
 
 run-long:
-	@go run main.go run --desc "Long run test" -c "sleep 30; echo \"Hola 30 seg\"; sleep 33; echo \"!Hola, Mundo!\""; \
+	@go run main.go run --desc "Long run test" -c "sleep 63; echo Hello"; \
 
 run-help:
 	@go run main.go run --help

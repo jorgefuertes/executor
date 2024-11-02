@@ -7,3 +7,6 @@ release
 .secrets
 .test_event.json
 .DS_Store
+*.mov
+*.webm
+palette.png
