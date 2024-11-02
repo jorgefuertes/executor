@@ -4,6 +4,12 @@ permissions:
   contents: read
 
 on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (e.g., v1.0.0)"
+        required: true
+        type: string
   push:
     tags:
       - v*.*.*
@@ -52,7 +58,7 @@ jobs:
               # Skip unsupported darwin combinations
               if [[ "$os/$arch" != "darwin/arm" && "$os/$arch" != "darwin/386" ]]; then
                 executable="executor"
-                archive_name="executor_${os}-${arch}_${VERSION//./_}"
+                archive_name="executor_${os}-${arch}_${TAG_NAME//./_}"
                 # .exe and zip for windows, tar.gz for others
                 if [ "$os" = "windows" ]; then
                   executable="${executable}.exe"
@@ -61,7 +67,7 @@ jobs:
                   archive_name="${archive_name}.tar.gz"
                 fi
                 echo "Building $os/$arch --> $executable"
-                GOOS=$os GOARCH=$arch go build -ldflags="-s -w -X main.version=${VERSION}" -o "release/$executable" main.go
+                GOOS=$os GOARCH=$arch go build -ldflags="-s -w -X main.version=${TAG_NAME}" -o "release/$executable" main.go
                 echo "Compressing $executable --> $archive_name"
                 if [ "$os" = "windows" ]; then
                   (cd release && zip -r "$archive_name" "$executable")
