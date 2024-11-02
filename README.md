@@ -6,11 +6,11 @@ Run commands in a fancy way.
 
 This is a small program just made to run any shell commands with visual feedback, timing and some other features, giving it a better and professional look.
 
-This is not intended to be an alternative to `make` or `task`, is just a complement. When your `make` output is too much to understand something, `executor` helps you to see, in a single look, if everithing goes ok.
+This is not intended to be an alternative to `make` or `task`, this is just a complement. When your `make` output is too much to understand, `executor` helps you to see, in a single look, if everything goes ok.
 
 ### Output shading
 
-Executor hides the standard and error output, showing it on error or as instructed via command line flags.
+Executor hides the standard and error output, displaying it only on error or as instructed via command line flags.
 
 ### Not interactive mode
 
@@ -19,6 +19,12 @@ Automatic detection of terminal type, acts as a simple log without colors or spi
 ## Demo
 
 ![Demo](./assets/demo.gif)
+
+## Installation
+
+~~~bash
+curl -Lo - https://raw.githubusercontent.com/jorgefuertes/executor/refs/heads/main/scripts/install.sh | sh
+~~~
 
 ## Quick usage
 
