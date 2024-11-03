@@ -7,6 +7,7 @@ import (
 	"executor/internal/commands"
 	"executor/internal/config"
 	"executor/internal/terminal"
+
 	"github.com/urfave/cli/v2"
 )
 
@@ -172,18 +173,16 @@ func main() {
 		},
 	}
 
-	defer func() {
-		terminal.ResetColor()
-		terminal.ShowCursor()
-	}()
-
 	err := app.Run(os.Args)
 	if err != nil {
 		fmt.Println()
 		terminal.Error(err)
 		fmt.Println()
+		terminal.CleanUp()
 		os.Exit(1)
 	}
+
+	terminal.CleanUp()
 }
 
 type actionFunc func(cfg *config.Config) error

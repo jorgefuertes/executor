@@ -59,27 +59,31 @@ func (p *Progress) elapsed() string {
 
 func (p *Progress) print() {
 	fmt.Print("\r")
-	Action(InfoLevel, p.title)
+	Action(InfoLevel, p.title, false)
 	et := p.elapsed()
 	p.printedLen = len(p.title) + 4 + len(et)
 	if p.ctx.Err() == nil {
-		SetColor(color.FgHiBlue)
+		color.Set(Blue...)
 		fmt.Print(et + " ")
 		p.printedLen++
 	} else {
-		SetColor(color.FgCyan)
+		color.Set(Cyan...)
 		fmt.Print(et)
 	}
 	if p.ctx.Err() == nil {
-		SetColor(color.FgYellow)
+		color.Set(Yellow...)
 		fmt.Print(p.spinner.chars[p.spin])
 		p.printedLen += len(p.spinner.chars[p.spin])
 	}
 
-	ResetColor()
+	color.Unset()
 }
 
 func (p *Progress) Start() {
+	Action(InfoLevel, p.title, true)
+	time.Sleep(slowPrintDelay)
+	fmt.Print("\r")
+
 	p.start = time.Now()
 
 	if !IsInteractive() {
@@ -87,8 +91,6 @@ func (p *Progress) Start() {
 	}
 
 	p.spin = 0
-
-	HideCursor()
 
 	go func() {
 		for {

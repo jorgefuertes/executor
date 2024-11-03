@@ -15,8 +15,6 @@ import (
 
 func Run(cfg *config.Config) error {
 	terminal.SetNoColor(cfg.NoColor)
-	defer terminal.ResetColor()
-	defer terminal.ShowCursor()
 
 	if len(cfg.Command) == 0 {
 		return ErrEmptyCommand
@@ -62,12 +60,12 @@ func Run(cfg *config.Config) error {
 	progress.Stop(err == nil)
 
 	if err != nil && cfg.ShowAnyOutput() {
-		terminal.Line(terminal.WarnLevel, "Failed command: "+cfg.Command)
+		terminal.Line(terminal.WarnLevel, "Failed command: "+cfg.Command, false)
 	}
 
 	if cfg.ShowOutput || (err != nil && cfg.ShowOutputOnError) {
 		fmt.Println()
-		terminal.Line(terminal.WarnLevel, "Command output:")
+		terminal.Line(terminal.WarnLevel, "Command output:", false)
 		fmt.Print(string(o))
 	}
 

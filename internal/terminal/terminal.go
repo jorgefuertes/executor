@@ -33,15 +33,22 @@ func init() {
 	// terminal columns
 	cols = defaultCols
 	if !IsInteractive() {
+		SetNoColor(true)
 		return
 	}
 
+	HideCursor()
 	c, _, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
 		return
 	}
 
 	cols = c
+}
+
+func CleanUp() {
+	color.Unset()
+	ShowCursor()
 }
 
 func IsInteractive() bool {
@@ -53,43 +60,17 @@ func IsInteractive() bool {
 
 func SetNoColor(forceNoColor bool) {
 	nocolor = forceNoColor
+	color.NoColor = nocolor
 }
 
-func caret(level Level) {
-	switch level {
-	case DebugLevel:
-		SetColor(color.FgHiBlue)
-	case InfoLevel:
-		SetColor(color.FgHiGreen)
-	case WarnLevel:
-		SetColor(color.FgHiYellow)
-	case ErrorLevel:
-		SetColor(color.FgHiRed)
-	}
-	fmt.Print(">")
-	SetColor(color.Reset)
-	fmt.Print(" ")
-}
-
-func Line(level Level, msg string) {
+func Line(level Level, msg string, slow bool) {
 	caret(level)
-	fmt.Println(msg)
+	Print(White, slow, msg+"\n")
 }
 
-func Action(level Level, msg string) {
+func Action(level Level, msg string, slow bool) {
 	caret(level)
-	SetColor(color.FgWhite)
-	fmt.Print(msg)
-	SetColor(color.FgWhite)
-	fmt.Print(": ")
-	SetColor(color.Reset)
-}
-
-func ActionNoColon(level Level, msg string) {
-	caret(level)
-	SetColor(color.FgWhite)
-	fmt.Print(msg)
-	SetColor(color.Reset)
+	Print(White, slow, msg+": ")
 }
 
 func Error(err error) {
@@ -98,14 +79,8 @@ func Error(err error) {
 	}
 
 	caret(ErrorLevel)
-	SetColor(color.BgRed, color.FgWhite)
-	fmt.Print("ERROR")
-	SetColor(color.Reset)
-	SetColor(color.FgHiWhite)
-	fmt.Print(": ")
-	SetColor(color.FgWhite)
-	fmt.Print(err.Error())
-	SetColor(color.Reset)
+	Print(RedLabel, false, "ERROR")
+	PrintF(White, false, ": %s", err.Error())
 	fmt.Println()
 }
 
@@ -121,21 +96,16 @@ func Result(ok bool) {
 	}
 
 	if ok {
-		SetColor(color.BgHiGreen, color.FgHiWhite)
-		fmt.Print("  OK  ")
+		Print(GreenLabel, false, "  OK  ")
 	} else {
-		SetColor(color.BgHiRed, color.FgHiWhite)
-		fmt.Print(" FAIL ")
+		Print(RedLabel, false, " FAIL ")
 	}
 
-	ResetColor()
 	fmt.Println()
 }
 
 func TableTile(title string) {
-	SetColor(color.BgHiBlue, color.FgWhite)
-	fmt.Print("  " + title + ":  ")
-	SetColor(color.Reset)
+	PrintF(CyanLabel, false, " %s: ", title)
 	fmt.Println()
 }
 
@@ -172,7 +142,5 @@ func ShowCursor() {
 }
 
 func DashedLine(fromCol int) {
-	SetColor(color.FgHiWhite)
-	fmt.Print(strings.Repeat("_", cols-fromCol-6))
-	ResetColor()
+	Print(Gray, false, strings.Repeat("_", cols-fromCol-6))
 }

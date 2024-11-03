@@ -51,12 +51,12 @@ func Which(cfg *config.Config) error {
 
 	terminal.SetNoColor(cfg.NoColor)
 	desc := "Looking for " + cfg.Command
-	terminal.ActionNoColon(terminal.InfoLevel, desc)
-	terminal.DashedLine(len(desc) + 2)
+	terminal.Action(terminal.InfoLevel, desc, true)
+	terminal.DashedLine(len(desc) + 4)
 	terminal.Result(ok)
 
 	if !ok {
-		terminal.Line(terminal.WarnLevel, cfg.NotFoundMsg)
+		terminal.Line(terminal.WarnLevel, cfg.NotFoundMsg, false)
 		return ErrCommandNotFound
 	}
 
