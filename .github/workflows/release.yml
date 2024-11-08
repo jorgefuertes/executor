@@ -74,10 +74,10 @@ jobs:
                 else
                   tar -C release -czf "release/$archive_name" "$executable"
                 fi
-                if [ "$os" = "darwin" && "$arch" = "arm64" ]; then
+                if [[ "$os" = "darwin" && "$arch" = "arm64" ]]; then
                   (cd release && ln -s "$archive_name" "executor-${TAG_NAME#v}.arm64_ventura.bottle.tar.gz")
                 fi
-                if [ "$os" = "darwin" && "$arch" = "amd64" ]; then
+                if [[ "$os" = "darwin" && "$arch" = "amd64" ]]; then
                   (cd release && ln -s "$archive_name" "executor-${TAG_NAME#v}.ventura.bottle.tar.gz")
                 fi
                 rm "release/$executable"
