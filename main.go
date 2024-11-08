@@ -32,6 +32,11 @@ func main() {
 		Usage:          "Execute commands in fancy way",
 		Version:        version,
 		DefaultCommand: runCommandName,
+		CommandNotFound: func(c *cli.Context, command string) {
+			terminal.Error(fmt.Errorf("command not found: %s", command))
+			terminal.CleanUp()
+			os.Exit(1)
+		},
 		Commands: []*cli.Command{
 			{
 				Name:  whichCommandName,
@@ -173,6 +178,8 @@ func main() {
 		},
 	}
 
+	defer terminal.CleanUp()
+
 	err := app.Run(os.Args)
 	if err != nil {
 		fmt.Println()
@@ -181,8 +188,6 @@ func main() {
 		terminal.CleanUp()
 		os.Exit(1)
 	}
-
-	terminal.CleanUp()
 }
 
 type actionFunc func(cfg *config.Config) error
