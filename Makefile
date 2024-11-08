@@ -101,4 +101,8 @@ release: clean
 			fi; \
 		done; \
 	done
-	@ls -sSFhC1 release
+	@for f in $(RELEASE_DIR)/*; do \
+		i=$$(basename $$f); \
+		size=$$(du -sh $$f | cut -f 1); \
+		echo "$$size\t$$(sha256sum $$f)"; \
+	done
