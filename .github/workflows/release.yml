@@ -76,16 +76,18 @@ jobs:
                 fi
                 if [[ "$os" = "darwin" && "$arch" = "arm64" ]]; then
                   pushd release
-                  mkdir -p "bottle/executor/${TAG_NAME#v}"
-                  cp "$executable" "bottle/executor/${TAG_NAME#v}/."
+                  bottle_dir="bottle/executor/${TAG_NAME#v}/bin"
+                  mkdir -p "$bottle_dir"
+                  cp "$executable" "$bottle_dir/."
                   tar -C bottle -czf "executor-${TAG_NAME#v}.arm64_ventura.bottle.tar.gz" executor
                   rm -Rf bottle
                   popd
                 fi
                 if [[ "$os" = "darwin" && "$arch" = "amd64" ]]; then
                   pushd release
-                  mkdir -p "bottle/executor/${TAG_NAME#v}"
-                  cp "$executable" "bottle/executor/${TAG_NAME#v}/."
+                  bottle_dir="bottle/executor/${TAG_NAME#v}/bin"
+                  mkdir -p "$bottle_dir"
+                  cp "$executable" "$bottle_dir/."
                   tar -C bottle -czf "executor-${TAG_NAME#v}.ventura.bottle.tar.gz" executor
                   rm -Rf bottle
                   popd
