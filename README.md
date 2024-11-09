@@ -22,6 +22,15 @@ Automatic detection of terminal type, acts as a simple log without colors or spi
 
 ## Installation
 
+### MacOS-X (homebrew)
+
+~~~bash
+brew tap jorgefuertes/executor
+brew install executor
+~~~
+
+### Linux and others (curl)
+
 ~~~bash
 curl -Lo - https://raw.githubusercontent.com/jorgefuertes/executor/refs/heads/main/scripts/install.sh | sh
 ~~~
