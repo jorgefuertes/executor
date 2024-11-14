@@ -24,8 +24,8 @@ func Port(cfg *config.Config) error {
 			_ = conn.Close()
 			break
 		}
-		if ctx.Done() != nil {
-			err = ctx.Err()
+		if ctx.Err() != nil {
+			err = fmt.Errorf("timeout after %v", cfg.Timeout)
 			break
 		}
 	}
