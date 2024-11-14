@@ -17,13 +17,15 @@ func Port(cfg *config.Config) error {
 	p.Start()
 
 	var err error
+	var conn net.Conn
 	for {
-		conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", cfg.Host, cfg.Port), cfg.Timeout)
+		conn, err = net.DialTimeout("tcp", fmt.Sprintf("%s:%d", cfg.Host, cfg.Port), cfg.Timeout)
 		if err == nil {
 			_ = conn.Close()
 			break
 		}
 		if ctx.Done() != nil {
+			err = ctx.Err()
 			break
 		}
 	}
