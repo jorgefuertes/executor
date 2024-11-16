@@ -18,7 +18,7 @@ test-v:
 	go test -v ./...
 
 run:
-	@go run main.go run --desc "Long run test" -c "sleep 2; echo \"!Hola, Mundo!\""; \
+	@go run main.go run --desc "Short run test" -c "sleep 2; echo \"!Hola, Mundo!\""; \
 
 run-which:
 	@go run main.go which -c ls
