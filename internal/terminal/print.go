@@ -13,8 +13,8 @@ const slowPrintDelay = 10 * time.Millisecond
 const cursorChar string = "█"
 
 var (
-	Gray       = []color.Attribute{color.FgHiWhite}
-	White      = []color.Attribute{color.FgWhite}
+	White      = []color.Attribute{color.FgHiWhite}
+	Gray       = []color.Attribute{color.FgWhite}
 	Blue       = []color.Attribute{color.FgHiBlue}
 	Green      = []color.Attribute{color.FgHiGreen}
 	Red        = []color.Attribute{color.FgHiRed}
