@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"strings"
 	"time"
 
 	"github.com/fatih/color"
@@ -61,11 +62,11 @@ func (p *Progress) print() {
 	fmt.Print("\r")
 	Action(InfoLevel, p.title, false)
 	et := p.elapsed()
-	p.printedLen = len(p.title) + 4 + len(et)
+	printedLen := len(p.title) + 4 + len(et)
 	if p.ctx.Err() == nil {
 		color.Set(Blue...)
 		fmt.Print(et + " ")
-		p.printedLen++
+		printedLen++
 	} else {
 		color.Set(Cyan...)
 		fmt.Print(et)
@@ -73,10 +74,18 @@ func (p *Progress) print() {
 	if p.ctx.Err() == nil {
 		color.Set(Yellow...)
 		fmt.Print(p.spinner.chars[p.spin])
-		p.printedLen += len(p.spinner.chars[p.spin])
+		printedLen += len(p.spinner.chars[p.spin])
+
+		// remaining spinner characters
+		if p.printedLen > printedLen {
+			diff := p.printedLen - printedLen
+			fmt.Print(strings.Repeat(" ", diff))
+			fmt.Print(strings.Repeat("\b", diff))
+		}
 	}
 
 	color.Unset()
+	p.printedLen = printedLen
 }
 
 func (p *Progress) Start() {
