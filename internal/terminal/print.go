@@ -7,18 +7,22 @@ import (
 	"github.com/fatih/color"
 )
 
-const Slow bool = true
-const Fast bool = false
-const slowPrintDelay = 10 * time.Millisecond
-const cursorChar string = "█"
+const (
+	Slow           bool   = true
+	Fast           bool   = false
+	slowPrintDelay        = 10 * time.Millisecond
+	cursorChar     string = "█"
+)
 
 var (
 	White      = []color.Attribute{color.FgHiWhite}
 	Gray       = []color.Attribute{color.FgWhite}
 	Blue       = []color.Attribute{color.FgHiBlue}
 	Green      = []color.Attribute{color.FgHiGreen}
+	DarkGreen  = []color.Attribute{color.FgGreen}
 	Red        = []color.Attribute{color.FgHiRed}
 	Yellow     = []color.Attribute{color.FgHiYellow}
+	Magenta    = []color.Attribute{color.FgHiMagenta}
 	Pink       = []color.Attribute{color.FgHiMagenta}
 	Cyan       = []color.Attribute{color.FgCyan}
 	RedLabel   = []color.Attribute{color.BgHiRed, color.FgHiWhite}

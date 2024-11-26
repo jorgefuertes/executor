@@ -31,17 +31,20 @@ demo:
 	@for style in $(STYLE_LIST); do \
 		DESC="Making something with '$$style' style"; \
 		SECS=$$(($${RANDOM} % 3 + 1)); \
-		echo "\033[90m#> executor run --desc \"$${DESC}\" -st $$style -c \"sleep $${SECS}; echo Hello;\"\033[0m" | pv -qL 40; \
+		echo "\033[90m#> executor run --desc \"$${DESC}\" -st $$style -c \"sleep $${SECS}; echo Hello;\"\033[0m" | pv -qL 60; \
 		go run main.go run --desc "$${DESC}" -st $$style -c "sleep $${SECS}; echo Hello"; \
 	done
-	@echo "\033[90mexecutor run --desc \"Not interactive and no color test\" --nc -st bar -c \"sleep 1; echo Hello\"\033[0m" | pv -qL 40
+	@echo "\033[90mexecutor run --desc \"Not interactive and no color test\" --nc -st bar -c \"sleep 1; echo Hello\"\033[0m" | pv -qL 60
 	@go run main.go run --desc "Not interactive and no color test" --nc -st bar -c "sleep 1; echo Hello"
-	@echo "\033[90m#> executor which -st $$style -c \"ls\"\033[0m" | pv -qL 40;
+	@echo "\033[90m#> executor which -st $$style -c \"ls\"\033[0m" | pv -qL 60;
 	@go run main.go which -c "ls"
 
 run-long:
-	@go run main.go run --desc "Long run test" -c "sleep 63; echo Hello"; \
-
+	@go run main.go run --desc "Long run test" -c "sleep 63; echo Hello";
+run-short:
+	@go run main.go run --desc "Short run test" -c "sleep 0.2; echo Hello";
+run-with-slow-output:
+	@go run main.go run --desc "Run with output" -c "cat Makefile | pv -qL 150"
 run-help:
 	@go run main.go run --help
 

@@ -9,7 +9,6 @@ import (
 
 	"executor/internal/config"
 	"executor/internal/terminal"
-
 	"github.com/olekukonko/tablewriter"
 )
 
@@ -43,6 +42,8 @@ func Run(cfg *config.Config) error {
 	}
 
 	progress := terminal.NewProgress(cfg.Desc, cfg.Style)
+	cmd.Stdout = progress.OutBuffer
+	cmd.Stderr = progress.ErrBuffer
 	progress.Start()
 
 	ch := make(chan os.Signal, 1)
@@ -51,12 +52,14 @@ func Run(cfg *config.Config) error {
 	go func() {
 		<-ch
 		err := cmd.Process.Signal(syscall.SIGTERM)
+		progress.Stop(false)
 		if err != nil {
 			terminal.Error(err)
 		}
+		os.Exit(1)
 	}()
 
-	o, err := cmd.CombinedOutput()
+	err := cmd.Run()
 	progress.Stop(err == nil)
 
 	if err != nil && cfg.ShowAnyOutput() {
@@ -66,7 +69,9 @@ func Run(cfg *config.Config) error {
 	if cfg.ShowOutput || (err != nil && cfg.ShowOutputOnError) {
 		fmt.Println()
 		terminal.Line(terminal.WarnLevel, "Command output:", false)
-		fmt.Print(string(o))
+		fmt.Print(progress.OutBuffer.String())
+		fmt.Println()
+		fmt.Print(progress.ErrBuffer.String())
 	}
 
 	return err
