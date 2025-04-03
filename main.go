@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"executor/internal/commands"
-	"executor/internal/config"
-	"executor/internal/terminal"
-
+	"github.com/jorgefuertes/executor/internal/commands"
+	"github.com/jorgefuertes/executor/internal/config"
+	"github.com/jorgefuertes/executor/internal/terminal"
 	"github.com/urfave/cli/v2"
 )
 

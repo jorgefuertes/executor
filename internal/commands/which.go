@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"executor/internal/config"
-	"executor/internal/terminal"
+	"github.com/jorgefuertes/executor/internal/config"
+	"github.com/jorgefuertes/executor/internal/terminal"
 )
 
 func isExecutable(cmd string) bool {

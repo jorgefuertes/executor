@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"executor/internal/terminal"
+	"github.com/jorgefuertes/executor/internal/terminal"
 	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli/v2"
 )
