@@ -142,5 +142,10 @@ func ShowCursor() {
 }
 
 func DashedLine(fromCol int) {
-	Print(Gray, false, strings.Repeat("…", cols-fromCol-6))
+	repeat := cols - fromCol - 6
+	if repeat < 0 {
+		repeat = 0
+	}
+
+	Print(Gray, false, strings.Repeat("…", repeat))
 }
