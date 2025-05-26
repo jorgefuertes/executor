@@ -27,7 +27,10 @@ func TestWhich(t *testing.T) {
 	t.Run("symbolic link to executable", func(t *testing.T) {
 		err := os.Symlink(fullPathCmd, sym)
 		require.NoError(t, err, "cannot create symbolic link '%s-->%s'", sym, fullPathCmd)
-		defer os.Remove(sym)
+		defer func() {
+			err := os.Remove(sym)
+			assert.NoError(t, err, "cannot remove symbolic link '%s'", sym)
+		}()
 
 		ok := isExecutable(sym)
 		require.True(t, ok, "executable '%s' not found", sym)
