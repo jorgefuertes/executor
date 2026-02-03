@@ -3,8 +3,6 @@ package terminal
 import (
 	"fmt"
 	"time"
-
-	"github.com/fatih/color"
 )
 
 const (
@@ -14,55 +12,50 @@ const (
 	cursorChar     string = "█"
 )
 
-var (
-	White      = []color.Attribute{color.FgHiWhite}
-	Gray       = []color.Attribute{color.FgWhite}
-	Blue       = []color.Attribute{color.FgHiBlue}
-	Green      = []color.Attribute{color.FgHiGreen}
-	DarkGreen  = []color.Attribute{color.FgGreen}
-	Red        = []color.Attribute{color.FgHiRed}
-	Yellow     = []color.Attribute{color.FgHiYellow}
-	Magenta    = []color.Attribute{color.FgHiMagenta}
-	Pink       = []color.Attribute{color.FgHiMagenta}
-	Cyan       = []color.Attribute{color.FgCyan}
-	RedLabel   = []color.Attribute{color.BgHiRed, color.FgHiWhite}
-	GreenLabel = []color.Attribute{color.BgHiGreen, color.FgHiWhite}
-	CyanLabel  = []color.Attribute{color.BgCyan, color.FgHiBlack}
-)
-
-func Print(cs []color.Attribute, slow bool, text string) {
-	color.Set(cs...)
-	defer color.Unset()
-
-	if slow && IsInteractive() {
-		for _, r := range text {
-			fmt.Print(cursorChar)
-			time.Sleep(slowPrintDelay)
-			fmt.Print("\b" + string(r))
+func Print(colorName colorStyle, slow bool, text string) {
+	if !slow || !IsInteractive() {
+		if HasColor() {
+			print(getColorStyle(colorName).Render(text))
+		} else {
+			print(text)
 		}
 
 		return
 	}
 
-	fmt.Print(text)
+	for _, r := range text {
+		if HasColor() {
+			print(getColorStyle(colorName).Render(string(cursorChar)))
+		} else {
+			print(string(cursorChar))
+		}
+
+		time.Sleep(slowPrintDelay)
+		print("\b")
+		if HasColor() {
+			print(getColorStyle(colorName).Render(string(r)))
+		} else {
+			print(string(r))
+		}
+	}
 }
 
-func PrintF(cs []color.Attribute, slow bool, format string, a ...any) {
+func PrintF(colorName colorStyle, slow bool, format string, a ...any) {
 	text := fmt.Sprintf(format, a...)
-	Print(cs, slow, text)
+	Print(colorName, slow, text)
 }
 
 func caret(level Level) {
 	switch level {
 	case DebugLevel:
-		Print(Pink, Fast, ">")
+		Print(DebugLevelColor, Fast, ">")
 	case InfoLevel:
-		Print(Green, Fast, ">")
+		Print(InfoLevelColor, Fast, ">")
 	case WarnLevel:
-		Print(Yellow, Fast, ">")
+		Print(WarnLevelColor, Fast, ">")
 	case ErrorLevel:
-		Print(Red, Fast, ">")
+		Print(ErrorLevelColor, Fast, ">")
 	}
 
-	fmt.Print(" ")
+	print(" ")
 }

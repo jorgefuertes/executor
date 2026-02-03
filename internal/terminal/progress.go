@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/dustin/go-humanize"
-	"github.com/fatih/color"
 )
 
 type Progress struct {
@@ -91,22 +90,17 @@ func (p *Progress) print() {
 	printedLen := len(p.title) + 4 + len(et)
 
 	if p.ctx.Err() == nil {
-		color.Set(Blue...)
-		fmt.Print(et)
+		Print(ClockColor, Fast, et)
 		printedLen++
 		if len(bl) > 0 {
 			printedLen += 1 + len(bl)
-			color.Set(DarkGreen...)
-			fmt.Print(bl)
+			Print(SizeColor, Fast, bl)
 		}
 		fmt.Print(" ")
-	} else {
-		color.Set(Cyan...)
-		fmt.Print(et)
 	}
+
 	if p.ctx.Err() == nil {
-		color.Set(Yellow...)
-		fmt.Print(p.spinner.chars[p.spin])
+		Print(SpinnerColor, Fast, p.spinner.chars[p.spin])
 		printedLen += len(p.spinner.chars[p.spin])
 
 		// remaining spinner characters
@@ -117,7 +111,6 @@ func (p *Progress) print() {
 		}
 	}
 
-	color.Unset()
 	p.printedLen = printedLen
 }
 
@@ -152,14 +145,15 @@ func (p *Progress) Start() {
 	}()
 }
 
-func (p *Progress) Stop(ok bool) {
+func (p *Progress) Stop(result bool) {
 	p.cancel()
 	p.print()
 
 	if IsInteractive() {
-		DashedLine(p.printedLen)
+		DashedLine(p.printedLen, len(p.elapsed())-1)
 	}
 
-	Result(ok)
+	Print(ClockColor, Fast, p.elapsed())
+	Result(result)
 	ShowCursor()
 }

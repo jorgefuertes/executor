@@ -5,7 +5,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/fatih/color"
 	"github.com/mattn/go-isatty"
 	"golang.org/x/term"
 )
@@ -47,30 +46,21 @@ func init() {
 }
 
 func CleanUp() {
-	color.Unset()
 	ShowCursor()
 }
 
 func IsInteractive() bool {
-	if nocolor {
-		return false
-	}
 	return interactive
-}
-
-func SetNoColor(forceNoColor bool) {
-	nocolor = forceNoColor
-	color.NoColor = nocolor
 }
 
 func Line(level Level, msg string, slow bool) {
 	caret(level)
-	Print(White, slow, msg+"\n")
+	Print(PrimaryColor, slow, msg+"\n")
 }
 
 func Action(level Level, msg string, slow bool) {
 	caret(level)
-	Print(White, slow, msg+": ")
+	Print(PrimaryColor, slow, msg+": ")
 }
 
 func Error(err error) {
@@ -79,8 +69,8 @@ func Error(err error) {
 	}
 
 	caret(ErrorLevel)
-	Print(RedLabel, false, "ERROR")
-	PrintF(White, false, ": %s", err.Error())
+	Print(ErrorColor, false, "ERROR")
+	PrintF(PrimaryColor, false, ": %s", err.Error())
 	fmt.Println()
 }
 
@@ -96,16 +86,24 @@ func Result(ok bool) {
 	}
 
 	if ok {
-		Print(GreenLabel, false, "  OK  ")
+		okText := "  OK  "
+		if !HasColor() {
+			okText = "[ OK ]"
+		}
+		Print(SuccessLabelColor, false, okText)
 	} else {
-		Print(RedLabel, false, " FAIL ")
+		failText := " FAIL "
+		if !HasColor() {
+			failText = "[FAIL]"
+		}
+		Print(ErrorLabelColor, false, failText)
 	}
 
 	fmt.Println()
 }
 
 func TableTile(title string) {
-	PrintF(CyanLabel, false, " %s: ", title)
+	PrintF(TableTitleColor, false, " %s: ", title)
 	fmt.Println()
 }
 
@@ -141,11 +139,11 @@ func ShowCursor() {
 	fmt.Print("\033[?25h")
 }
 
-func DashedLine(fromCol int) {
-	repeat := cols - fromCol - 6
+func DashedLine(fromCol int, rightMargin int) {
+	repeat := cols - fromCol - rightMargin
 	if repeat < 0 {
 		repeat = 0
 	}
 
-	Print(Gray, false, strings.Repeat("…", repeat))
+	Print(SecondaryColor, false, strings.Repeat("…", repeat))
 }
