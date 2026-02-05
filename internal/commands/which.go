@@ -53,6 +53,7 @@ func Which(cfg *config.Config) error {
 	desc := "Looking for " + cfg.Command
 	_ = terminal.Action(terminal.InfoLevel, desc, true)
 	terminal.DashedLine()
+	print(strings.Repeat("\b", 5))
 	terminal.Result(ok)
 
 	if !ok {
