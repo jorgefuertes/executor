@@ -3,7 +3,9 @@ package terminal
 import (
 	"fmt"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 
 	"github.com/mattn/go-isatty"
 	"golang.org/x/term"
@@ -16,33 +18,39 @@ const (
 	InfoLevel
 	WarnLevel
 	ErrorLevel
-	defaultCols  = 80
-	defaultLines = 24
+	defaultCols                 = 80
+	defaultLines                = 24
+	minInteractiveRemainingCols = 15
 )
 
 var (
 	interactive bool
 	nocolor     bool
-	cols        int
+	width       int
 )
 
 func init() {
 	interactive = isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd())
 
 	// terminal columns
-	cols = defaultCols
+	width = defaultCols
 	if !IsInteractive() {
 		SetNoColor(true)
+
 		return
 	}
 
 	HideCursor()
 	c, _, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
+		interactive = false
+
 		return
 	}
 
-	cols = c
+	width = c
+
+	watchTerminalResize()
 }
 
 func CleanUp() {
@@ -51,27 +59,6 @@ func CleanUp() {
 
 func IsInteractive() bool {
 	return interactive
-}
-
-func Line(level Level, msg string, slow bool) {
-	caret(level)
-	Print(PrimaryColor, slow, msg+"\n")
-}
-
-func Action(level Level, msg string, slow bool) {
-	caret(level)
-	Print(PrimaryColor, slow, msg+": ")
-}
-
-func Error(err error) {
-	if err == nil {
-		return
-	}
-
-	caret(ErrorLevel)
-	Print(ErrorColor, false, "ERROR")
-	PrintF(PrimaryColor, false, ": %s", err.Error())
-	fmt.Println()
 }
 
 func Result(ok bool) {
@@ -107,22 +94,6 @@ func TableTile(title string) {
 	fmt.Println()
 }
 
-func SavePos() {
-	if !IsInteractive() {
-		return
-	}
-
-	fmt.Print("\033[s")
-}
-
-func RestorePos() {
-	if !IsInteractive() {
-		return
-	}
-
-	fmt.Print("\033[u")
-}
-
 func HideCursor() {
 	if !IsInteractive() {
 		return
@@ -139,11 +110,73 @@ func ShowCursor() {
 	fmt.Print("\033[?25h")
 }
 
-func DashedLine(fromCol int, rightMargin int) {
-	repeat := cols - fromCol - rightMargin
-	if repeat < 0 {
-		repeat = 0
+func DashedLine() {
+	if !IsInteractive() {
+		Print(SecondaryColor, false, ellipsis)
+
+		return
 	}
 
-	Print(SecondaryColor, false, strings.Repeat("…", repeat))
+	_, col, err := GetCursorPosition()
+	if err != nil {
+		Print(SecondaryColor, false, ellipsis)
+
+		return
+	}
+
+	Print(SecondaryColor, false, strings.Repeat(ellipsis, width-col))
+}
+
+func watchTerminalResize() {
+	sigwinch := make(chan os.Signal, 1)
+	signal.Notify(sigwinch, syscall.SIGWINCH)
+
+	go func() {
+		for range sigwinch {
+			newWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
+			if err == nil {
+				width = newWidth
+			}
+		}
+	}()
+}
+
+func GetCursorPosition() (int, int, error) {
+	if !IsInteractive() {
+		return 0, 0, fmt.Errorf("not an interactive terminal")
+	}
+
+	// save current terminal state
+	oldState, err := term.GetState(int(os.Stdin.Fd()))
+	if err != nil {
+		return 0, 0, fmt.Errorf("failed to get terminal state: %w", err)
+	}
+	defer func() {
+		_ = term.Restore(int(os.Stdin.Fd()), oldState)
+	}()
+
+	// set terminal to raw mode
+	_, err = term.MakeRaw(int(os.Stdin.Fd()))
+	if err != nil {
+		return 0, 0, fmt.Errorf("failed to set raw mode: %w", err)
+	}
+
+	// request cursor position
+	fmt.Print("\033[6n")
+
+	// read response with timeout
+	buf := make([]byte, 32)
+	n, err := os.Stdin.Read(buf)
+	if err != nil {
+		return 0, 0, fmt.Errorf("failed to read cursor position: %w", err)
+	}
+
+	// Parse response: \033[{row};{col}R
+	var row, col int
+	_, err = fmt.Sscanf(string(buf[:n]), "\033[%d;%dR", &row, &col)
+	if err != nil {
+		return 0, 0, fmt.Errorf("failed to parse cursor position: %w", err)
+	}
+
+	return row, col, nil
 }

@@ -13,16 +13,16 @@ import (
 )
 
 type Progress struct {
-	title      string
-	spinner    spinner
-	spin       int
-	start      time.Time
-	printedLen int
-	ctx        context.Context
-	cancel     context.CancelFunc
-	lock       *sync.Mutex
-	OutBuffer  *bytes.Buffer
-	ErrBuffer  *bytes.Buffer
+	title          string
+	spinner        spinner
+	lastPrintedLen int
+	spin           int
+	start          time.Time
+	ctx            context.Context
+	cancel         context.CancelFunc
+	lock           *sync.Mutex
+	OutBuffer      *bytes.Buffer
+	ErrBuffer      *bytes.Buffer
 }
 
 func NewProgress(title, style string) *Progress {
@@ -34,16 +34,14 @@ func NewProgress(title, style string) *Progress {
 	}
 
 	return &Progress{
-		title:      title,
-		spinner:    s,
-		spin:       0,
-		start:      time.Now(),
-		printedLen: 0,
-		ctx:        ctx,
-		cancel:     cancel,
-		lock:       &sync.Mutex{},
-		OutBuffer:  new(bytes.Buffer),
-		ErrBuffer:  new(bytes.Buffer),
+		title:     title,
+		spinner:   s,
+		start:     time.Now(),
+		ctx:       ctx,
+		cancel:    cancel,
+		lock:      &sync.Mutex{},
+		OutBuffer: new(bytes.Buffer),
+		ErrBuffer: new(bytes.Buffer),
 	}
 }
 
@@ -79,48 +77,13 @@ func (p *Progress) bufLen() string {
 	return ""
 }
 
-func (p *Progress) print() {
-	p.lock.Lock()
-	defer p.lock.Unlock()
-	fmt.Print("\r")
-	Action(InfoLevel, p.title, false)
-
-	et := p.elapsed()
-	bl := p.bufLen()
-	printedLen := len(p.title) + 4 + len(et)
-
-	if p.ctx.Err() == nil {
-		Print(ClockColor, Fast, et)
-		printedLen++
-		if len(bl) > 0 {
-			printedLen += 1 + len(bl)
-			Print(SizeColor, Fast, bl)
-		}
-		fmt.Print(" ")
-	}
-
-	if p.ctx.Err() == nil {
-		Print(SpinnerColor, Fast, p.spinner.chars[p.spin])
-		printedLen += len(p.spinner.chars[p.spin])
-
-		// remaining spinner characters
-		if p.printedLen > printedLen {
-			diff := p.printedLen - printedLen
-			fmt.Print(strings.Repeat(" ", diff))
-			fmt.Print(strings.Repeat("\b", diff))
-		}
-	}
-
-	p.printedLen = printedLen
-}
-
 func (p *Progress) Start() {
 	p.lock.Lock()
+
 	Action(InfoLevel, p.title, true)
 	time.Sleep(slowPrintDelay)
-	fmt.Print("\r")
-	p.lock.Unlock()
 
+	p.lock.Unlock()
 	p.start = time.Now()
 
 	if !IsInteractive() {
@@ -128,18 +91,41 @@ func (p *Progress) Start() {
 	}
 
 	p.spin = 0
-
 	go func() {
 		for {
+			p.lock.Lock()
+
 			if p.ctx.Err() != nil {
+				p.lock.Unlock()
 				return
 			}
+
+			print(" ")
+			Print(ClockColor, Fast, p.elapsed())
+			printedLen := len(p.elapsed()) + 1
+			if len(p.bufLen()) > 0 {
+				Print(SizeColor, Fast, p.bufLen())
+				printedLen += len(p.bufLen())
+			}
+			print(" ")
+			printedLen++
 
 			p.spin++
 			if p.spin > len(p.spinner.chars)-1 {
 				p.spin = 0
 			}
-			p.print()
+
+			Print(SpinnerColor, Fast, p.spinner.chars[p.spin])
+			printedLen++
+			if p.lastPrintedLen > printedLen {
+				print(strings.Repeat(" ", p.lastPrintedLen-printedLen))
+				print(strings.Repeat("\b", p.lastPrintedLen-printedLen))
+			}
+			p.lastPrintedLen = printedLen
+
+			print(strings.Repeat("\b", printedLen))
+
+			p.lock.Unlock()
 			time.Sleep(p.spinner.delay)
 		}
 	}()
@@ -147,12 +133,9 @@ func (p *Progress) Start() {
 
 func (p *Progress) Stop(result bool) {
 	p.cancel()
-	p.print()
 
-	if IsInteractive() {
-		DashedLine(p.printedLen, len(p.elapsed())-1)
-	}
-
+	DashedLine()
+	print(strings.Repeat("\b", len(p.elapsed())+5))
 	Print(ClockColor, Fast, p.elapsed())
 	Result(result)
 	ShowCursor()

@@ -10,6 +10,7 @@ const (
 	Fast           bool   = false
 	slowPrintDelay        = 10 * time.Millisecond
 	cursorChar     string = "█"
+	ellipsis              = "…"
 )
 
 func Print(colorName colorStyle, slow bool, text string) {
@@ -58,4 +59,28 @@ func caret(level Level) {
 	}
 
 	print(" ")
+}
+
+func Line(level Level, msg string, slow bool) {
+	caret(level)
+	Print(PrimaryColor, slow, msg+"\n")
+}
+
+func Action(level Level, msg string, slow bool) int {
+	caret(level)
+
+	Print(PrimaryColor, slow, msg+":")
+
+	return len(msg) + 3
+}
+
+func Error(err error) {
+	if err == nil {
+		return
+	}
+
+	caret(ErrorLevel)
+	Print(ErrorColor, false, "ERROR")
+	PrintF(PrimaryColor, false, ": %s", err.Error())
+	fmt.Println()
 }
