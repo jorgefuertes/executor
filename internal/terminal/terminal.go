@@ -3,9 +3,7 @@ package terminal
 import (
 	"fmt"
 	"os"
-	"os/signal"
 	"strings"
-	"syscall"
 
 	"github.com/mattn/go-isatty"
 	"golang.org/x/term"
@@ -49,8 +47,6 @@ func init() {
 	}
 
 	width = c
-
-	watchTerminalResize()
 }
 
 func CleanUp() {
@@ -125,20 +121,6 @@ func DashedLine() {
 	}
 
 	Print(SecondaryColor, false, strings.Repeat(ellipsis, width-col))
-}
-
-func watchTerminalResize() {
-	sigwinch := make(chan os.Signal, 1)
-	signal.Notify(sigwinch, syscall.SIGWINCH)
-
-	go func() {
-		for range sigwinch {
-			newWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
-			if err == nil {
-				width = newWidth
-			}
-		}
-	}()
 }
 
 func GetCursorPosition() (int, int, error) {
