@@ -1,5 +1,8 @@
 # Executor
 
+| ![Executor Logo](assets/executor.svg) |
+|:--:|
+
 Run commands in a fancy way.
 
 ## About executor

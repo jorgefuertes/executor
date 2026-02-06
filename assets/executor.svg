@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="600"
+   height="190"
+   viewBox="0 0 600 190"
+   version="1.1"
+   id="svg20"
+   sodipodi:docname="executor.svg"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview20"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="2.115"
+     inkscape:cx="270.68558"
+     inkscape:cy="78.250591"
+     inkscape:window-width="2184"
+     inkscape:window-height="1382"
+     inkscape:window-x="0"
+     inkscape:window-y="30"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg20" />
+  <!-- Fondo -->
+  <rect
+     width="600"
+     height="190"
+     rx="18"
+     fill="#0d1117"
+     id="rect1" />
+  <!-- Monitor exterior (beige, 4:3) -->
+  <rect
+     x="30"
+     y="22"
+     width="210"
+     height="140"
+     rx="18"
+     fill="#d6d1c4"
+     id="rect2" />
+  <!-- Sombra interior -->
+  <rect
+     x="42"
+     y="34"
+     width="186"
+     height="116"
+     rx="16"
+     fill="#c8c2b4"
+     id="rect3" />
+  <!-- Pantalla CRT curvada (AHORA SÍ dentro del marco) -->
+  <!-- Glow fósforo -->
+  <!-- Scanlines sutiles (dentro de pantalla) -->
+  <!-- Prompt -->
+  <!-- Botón -->
+  <circle
+     cx="220"
+     cy="154"
+     r="6"
+     fill="#9c978b"
+     id="circle18" />
+  <circle
+     cx="220"
+     cy="154"
+     r="3"
+     fill="#7f7a6f"
+     id="circle19" />
+  <!-- Base -->
+  <rect
+     x="110"
+     y="165.63594"
+     width="60"
+     height="10.364066"
+     rx="4"
+     fill="#b0ab9f"
+     id="rect19"
+     style="stroke-width:1.1382" />
+  <!-- Texto -->
+  <text
+     x="266.76752"
+     y="112.06978"
+     font-family="Inter, system-ui, sans-serif"
+     font-size="58.8571px"
+     font-weight="600"
+     fill="#e6edf3"
+     id="text19"
+     style="stroke-width:1.22619;fill:#d6d1c4;fill-opacity:1">executor</text>
+  <!-- Gradiente CRT -->
+  <defs
+     id="defs20">
+    <inkscape:path-effect
+       effect="fillet_chamfer"
+       id="path-effect21"
+       is_visible="true"
+       lpeversion="1"
+       nodesatellites_param="F,0,0,1,0,14.184398,0,1 @ F,0,0,1,0,11.443191,0,1 @ F,0,0,1,0,11.372827,0,1 @ F,0,0,1,0,11.583924,0,1"
+       radius="0"
+       unit="px"
+       method="auto"
+       mode="F"
+       chamfer_steps="1"
+       flexible="false"
+       use_knot_distance="true"
+       apply_no_radius="true"
+       apply_with_radius="true"
+       only_selected="false"
+       hide_knots="false" />
+    <linearGradient
+       id="swatch20"
+       inkscape:swatch="solid">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop21" />
+    </linearGradient>
+    <linearGradient
+       id="crtGlow"
+       x1="36.798592"
+       y1="96.036283"
+       x2="36.798592"
+       y2="200.4968"
+       gradientTransform="matrix(3.2610642,0.03592845,0,0.99636095,-66.563858,-57.488171)"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0%"
+         stop-color="#0f3a52"
+         stop-opacity="0.85"
+         id="stop19" />
+      <stop
+         offset="100%"
+         stop-color="#081a24"
+         stop-opacity="0.95"
+         id="stop20" />
+    </linearGradient>
+    <!-- Clip para scanlines -->
+    <clipPath
+       id="screenClip">
+      <path
+         d="M56 56 Q150 48 244 56 L240 120 Q150 128 60 120 Z"
+         id="path20" />
+    </clipPath>
+  </defs>
+  <path
+     style="fill:#323232;fill-opacity:1;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+     id="rect21"
+     width="156.02838"
+     height="96.926712"
+     x="55.791962"
+     y="45.862885"
+     inkscape:path-effect="#path-effect21"
+     sodipodi:type="rect"
+     d="m 69.97636,45.862885 130.40079,0 a 11.443191,11.443191 45 0 1 11.44319,11.443191 V 131.41677 A 11.372827,11.372827 135 0 1 200.44752,142.7896 H 67.375886 A 11.583924,11.583924 45 0 1 55.791962,131.20567 V 60.047283 A 14.184398,14.184398 135 0 1 69.97636,45.862885 Z"
+     transform="matrix(1.1085994,0,0,1.0674728,-13.112822,-8.728518)" />
+  <text
+     x="58.283684"
+     y="132.66193"
+     font-family="SFMono-Regular, Consolas, monospace"
+     font-size="32px"
+     fill="#58a6ff"
+     id="text18"
+     style="fill:#d6d1c4;fill-opacity:1">&gt;_</text>
+</svg>
