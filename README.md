@@ -1,11 +1,19 @@
-
 # ![Executor Logo](assets/executor.svg)
 
-## About executor
+[![Go Report Card](https://goreportcard.com/badge/github.com/jorgefuertes/executor)](https://goreportcard.com/report/github.com/jorgefuertes/executor)
+[![GoDoc](https://godoc.org/github.com/jorgefuertes/executor?status.svg)](https://godoc.org/github.com/jorgefuertes/executor)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/jorgefuertes/executor/total) ![GitHub Release](https://img.shields.io/github/v/release/jorgefuertes/executor)
+
+## Execute commands in a fancy way
 
 This is a small program just made to run any shell commands with visual feedback, timing and some other features, giving it a better and professional look.
 
 This is not intended to be an alternative to `make` or `task`, this is just a complement. When your `make` output is too much to understand, `executor` helps you to see, in a single look, if everything goes ok.
+
+### Goals
+
+- Hide the log polution.
+- Error output clear view when something goes wrong.
 
 ### Output shading
 
