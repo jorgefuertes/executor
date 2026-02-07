@@ -51,7 +51,7 @@ func main() {
 					&cli.BoolFlag{
 						Name:    "show-env",
 						Aliases: []string{"se"},
-						Usage:   "Show enviroment before start",
+						Usage:   "Show environment before start",
 						Value:   false,
 					},
 					&cli.BoolFlag{
@@ -80,7 +80,7 @@ func main() {
 					&cli.StringFlag{
 						Name:    "env-file",
 						Aliases: []string{"n"},
-						Usage:   "Enviroment file ('none' to disable)",
+						Usage:   "Environment file ('none' to disable)",
 						Value:   ".env",
 					},
 					&cli.IntFlag{

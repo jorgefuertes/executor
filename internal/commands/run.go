@@ -23,7 +23,7 @@ func Run(cfg *config.Config) error {
 
 	if cfg.ShowEnv {
 		fmt.Println()
-		terminal.TableTile("Enviroment")
+		terminal.TableTile("Environment")
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetCaption(true, fmt.Sprintf("%s: %d vars", cfg.EnvFileName, len(mainEnv)))
 		table.SetHeader([]string{"Variable", "Value"})
