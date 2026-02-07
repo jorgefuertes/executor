@@ -42,6 +42,23 @@ brew install executor
 curl -Lo - https://raw.githubusercontent.com/jorgefuertes/executor/refs/heads/main/scripts/install.sh | sh
 ~~~
 
+### As a _Go_ tool
+
+Add to your `go.mod`:
+
+~~~go.mod
+tool (
+    https://github.com/jorgefuertes/executor
+)
+~~~
+
+Then:
+
+~~~bash
+go mod tidy
+go tool executor --help
+~~~
+
 ## Quick usage
 
 ### Getting help
