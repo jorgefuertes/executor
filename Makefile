@@ -28,15 +28,20 @@ run-which:
 	@go run main.go which --silent -c non-existing-command
 
 demo:
+	@clear
+	@go run main.go run --desc "Linting code" -c "sleep .2; head -n10 /dev/random; sleep 2; head -n5 /dev/random; sleep 2"
+	@go run main.go run --desc "Backend testing" -c "sleep 5"
+	@go run main.go run --desc "Frontend testing" -c "sleep 3"
+	@go run main.go run --desc "Integration tests" -c "sleep 2"
+	@go run main.go run --desc "Compressing assets" -c "sleep .250"
+	@go run main.go run --desc "Checking paths" -c "sleep .150"
+	@go run main.go run --desc "Building lambdas" -c "sleep .2; head -n10 /dev/random; sleep 3"
 	@for style in $(STYLE_LIST); do \
 		DESC="Making something with '$$style' style"; \
 		SECS=$$(($${RANDOM} % 3 + 1)); \
-		echo "\033[90m#> executor run --desc \"$${DESC}\" -st $$style -c \"sleep $${SECS}; echo Hello;\"\033[0m"; \
 		go run main.go run --desc "$${DESC}" -st $$style -c "sleep $${SECS}; echo Hello"; \
 	done
-	@echo "\033[90mexecutor run --desc \"Not interactive and no color test\" --nc -st bar -c \"sleep 1; echo Hello\"\033[0m"
 	@go run main.go run --desc "Not interactive and no color test" --nc -st bar -c "sleep 1; echo Hello"
-	@echo "\033[90m#> executor which -st $$style -c \"ls\"\033[0m" | pv -qL 60;
 	@go run main.go which -c "ls"
 
 run-long:

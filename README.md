@@ -1,9 +1,5 @@
-# Executor
 
-| ![Executor Logo](assets/executor.svg) |
-|:--:|
-
-Run commands in a fancy way.
+# ![Executor Logo](assets/executor.svg)
 
 ## About executor
 
@@ -71,5 +67,5 @@ Check the included help `--help` for more info.
 
 ## Authors
 
-- Idea: Marcos Gómez.
-- Main developer: [Jorge Fuertes AKA Queru](https://github.com/jorgefuertes).
+- **Idea**: Marcos Gómez.
+- **Main developer**: [Jorge Fuertes AKA Queru](https://github.com/jorgefuertes).

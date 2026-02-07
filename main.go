@@ -17,10 +17,11 @@ func (o Output) String() string {
 }
 
 const (
-	whichCommandName = "which"
-	runCommandName   = "run"
-	portCommandName  = "port"
-	webCommandName   = "web"
+	whichCommandName   = "which"
+	runCommandName     = "run"
+	portCommandName    = "port"
+	webCommandName     = "web"
+	versionCommandName = "version"
 )
 
 var version string
@@ -37,43 +38,6 @@ func main() {
 			os.Exit(1)
 		},
 		Commands: []*cli.Command{
-			{
-				Name:  whichCommandName,
-				Usage: "Check if a command exists in the system path",
-				Flags: []cli.Flag{
-					&cli.BoolFlag{
-						Name:    "silent",
-						Aliases: []string{"s"},
-						Usage:   "Silent if command is found",
-						Value:   false,
-					},
-					&cli.BoolFlag{
-						Name:       "no-color",
-						Aliases:    []string{"nc"},
-						Value:      false,
-						Usage:      "Disable color output and spinner",
-						HasBeenSet: true,
-					},
-					&cli.BoolFlag{
-						Name:    "show-config",
-						Aliases: []string{"sc"},
-						Usage:   "Show config before start",
-						Value:   false,
-					},
-					&cli.StringFlag{
-						Name:    "cmd",
-						Aliases: []string{"c"},
-						Usage:   "Command to check",
-					},
-					&cli.StringFlag{
-						Name:    "not-found-msg",
-						Aliases: []string{"m"},
-						Usage:   "Text to show if command not found, typically some install hint",
-						Value:   "Command not found, please install it now.",
-					},
-				},
-				Action: newActionFunc(commands.Which),
-			},
 			{
 				Name:  runCommandName,
 				Usage: "Run a command",
@@ -144,6 +108,43 @@ func main() {
 				Action: newActionFunc(commands.Run),
 			},
 			{
+				Name:  whichCommandName,
+				Usage: "Check if a command exists in the system path",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:    "silent",
+						Aliases: []string{"s"},
+						Usage:   "Silent if command is found",
+						Value:   false,
+					},
+					&cli.BoolFlag{
+						Name:       "no-color",
+						Aliases:    []string{"nc"},
+						Value:      false,
+						Usage:      "Disable color output and spinner",
+						HasBeenSet: true,
+					},
+					&cli.BoolFlag{
+						Name:    "show-config",
+						Aliases: []string{"sc"},
+						Usage:   "Show config before start",
+						Value:   false,
+					},
+					&cli.StringFlag{
+						Name:    "cmd",
+						Aliases: []string{"c"},
+						Usage:   "Command to check",
+					},
+					&cli.StringFlag{
+						Name:    "not-found-msg",
+						Aliases: []string{"m"},
+						Usage:   "Text to show if command not found, typically some install hint",
+						Value:   "Command not found, please install it now.",
+					},
+				},
+				Action: newActionFunc(commands.Which),
+			},
+			{
 				Name:  portCommandName,
 				Usage: "Check if a port is open",
 				Flags: []cli.Flag{
@@ -174,6 +175,14 @@ func main() {
 				},
 				Action: newActionFunc(commands.Web),
 			},
+			{
+				Name:  versionCommandName,
+				Usage: "Show version",
+				Action: func(c *cli.Context) error {
+					print(version)
+					return nil
+				},
+			},
 		},
 	}
 
@@ -181,9 +190,9 @@ func main() {
 
 	err := app.Run(os.Args)
 	if err != nil {
-		fmt.Println()
+		print()
 		terminal.Error(err)
-		fmt.Println()
+		print()
 		terminal.CleanUp()
 		os.Exit(1)
 	}
