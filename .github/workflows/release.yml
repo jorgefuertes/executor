@@ -79,7 +79,12 @@ jobs:
                   bottle_dir="bottle/executor/${TAG_NAME#v}/bin"
                   mkdir -p "$bottle_dir"
                   cp "$executable" "$bottle_dir/."
-                  tar -C bottle -czf "executor-${TAG_NAME#v}.arm64_ventura.bottle.tar.gz" executor
+                  
+                  # Generate bottles for different macOS versions (same binary works for all)
+                  for platform in arm64_sequoia arm64_sonoma arm64_ventura; do
+                    tar -C bottle -czf "executor-${TAG_NAME#v}.${platform}.bottle.tar.gz" executor
+                  done
+                  
                   rm -Rf bottle
                   popd
                 fi
@@ -88,7 +93,12 @@ jobs:
                   bottle_dir="bottle/executor/${TAG_NAME#v}/bin"
                   mkdir -p "$bottle_dir"
                   cp "$executable" "$bottle_dir/."
-                  tar -C bottle -czf "executor-${TAG_NAME#v}.ventura.bottle.tar.gz" executor
+                  
+                  # Generate bottles for different macOS versions (same binary works for all)
+                  for platform in sonoma ventura; do
+                    tar -C bottle -czf "executor-${TAG_NAME#v}.${platform}.bottle.tar.gz" executor
+                  done
+                  
                   rm -Rf bottle
                   popd
                 fi
