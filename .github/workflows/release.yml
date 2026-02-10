@@ -15,9 +15,49 @@ on:
       - v*.*.*
 
 jobs:
+  lint:
+    name: Run linters
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-go@v5.1.0
+        with:
+          go-version: 1.24
+      - run: go install
+      - run: go test ./...
+      - run: go vet ./...
+      - uses: dominikh/staticcheck-action@v1.3.1
+        with:
+          version: latest
+          install-go: false
+      - uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+
+  test:
+    name: Test the code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go
+        id: go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.24
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: run tests
+        run: |
+          go mod tidy
+          go test -v ./...
+
   release:
     name: Create and Publish Release
     runs-on: ubuntu-latest
+    needs: [lint, test]
 
     steps:
       - name: Set up Go
