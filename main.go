@@ -33,7 +33,7 @@ func main() {
 		Version:        version,
 		DefaultCommand: runCommandName,
 		CommandNotFound: func(c *cli.Context, command string) {
-			print(fmt.Errorf("Command not found: %s", command))
+			print(fmt.Errorf("command not found: %s", command))
 			os.Exit(1)
 		},
 		Commands: []*cli.Command{
