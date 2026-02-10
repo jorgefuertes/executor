@@ -49,15 +49,17 @@ func Which(cfg *config.Config) error {
 		return nil
 	}
 
-	terminal.SetNoColor(cfg.NoColor)
+	t := terminal.New(cfg)
+	defer t.CleanUp()
+
 	desc := "Looking for " + cfg.Command
-	_ = terminal.Action(terminal.InfoLevel, desc, true)
-	terminal.DashedLine()
+	_ = t.Action(terminal.InfoLevel, desc, true)
+	t.DashedLine()
 	print(strings.Repeat("\b", 5))
-	terminal.Result(ok)
+	t.Result(ok)
 
 	if !ok {
-		terminal.Line(terminal.WarnLevel, cfg.NotFoundMsg, false)
+		t.Line(terminal.WarnLevel, cfg.NotFoundMsg, false)
 		return ErrCommandNotFound
 	}
 

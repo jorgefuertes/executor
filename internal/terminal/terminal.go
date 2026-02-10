@@ -5,7 +5,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/mattn/go-isatty"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/jorgefuertes/executor/internal/config"
+	"github.com/muesli/termenv"
 	"golang.org/x/term"
 )
 
@@ -21,110 +23,116 @@ const (
 	minInteractiveRemainingCols = 15
 )
 
-var (
+type Term struct {
+	cfg         *config.Config
+	color       bool
 	interactive bool
-	nocolor     bool
 	width       int
-)
+}
 
-func init() {
-	interactive = isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd())
-
-	// terminal columns
-	width = defaultCols
-	if !IsInteractive() {
-		SetNoColor(true)
-
-		return
+func New(cfg *config.Config) *Term {
+	t := &Term{
+		cfg:         cfg,
+		color:       lipgloss.ColorProfile() != termenv.Ascii,
+		interactive: lipgloss.ColorProfile() != termenv.Ascii,
+		width:       defaultCols,
 	}
 
-	HideCursor()
+	if cfg.NoColor {
+		t.color = false
+	}
+
+	if cfg.NoInteractive {
+		t.interactive = false
+	}
+
+	t.HideCursor()
 	c, _, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
-		interactive = false
+		t.interactive = false
 
-		return
+		return t
 	}
 
-	width = c
+	t.width = c
+
+	return t
 }
 
-func CleanUp() {
-	ShowCursor()
+func (t *Term) CleanUp() {
+	t.ShowCursor()
 }
 
-func IsInteractive() bool {
-	return interactive
+func (t *Term) SetNoInteractive() {
+	t.interactive = false
 }
 
-func Result(ok bool) {
-	if !IsInteractive() {
-		if ok {
-			fmt.Println(" OK")
-		} else {
-			fmt.Println(" FAIL")
-		}
+func (t *Term) IsInteractive() bool {
+	return t.interactive
+}
 
-		return
-	}
+func (t *Term) HasColor() bool {
+	return t.color
+}
 
+func (t *Term) Result(ok bool) {
 	if ok {
 		okText := "  OK  "
-		if !HasColor() {
+		if !t.HasColor() {
 			okText = "[ OK ]"
 		}
-		Print(SuccessLabelColor, false, okText)
+		t.Print(SuccessLabelColor, false, okText)
 	} else {
 		failText := " FAIL "
-		if !HasColor() {
+		if !t.HasColor() {
 			failText = "[FAIL]"
 		}
-		Print(ErrorLabelColor, false, failText)
+		t.Print(ErrorLabelColor, false, failText)
 	}
 
 	fmt.Println()
 }
 
-func TableTile(title string) {
-	PrintF(TableTitleColor, false, " %s: ", title)
+func (t *Term) TableTile(title string) {
+	t.PrintF(TableTitleColor, false, " %s: ", title)
 	fmt.Println()
 }
 
-func HideCursor() {
-	if !IsInteractive() {
+func (t *Term) HideCursor() {
+	if !t.IsInteractive() {
 		return
 	}
 
 	fmt.Print("\033[?25l")
 }
 
-func ShowCursor() {
-	if !IsInteractive() {
+func (t *Term) ShowCursor() {
+	if !t.IsInteractive() {
 		return
 	}
 
 	fmt.Print("\033[?25h")
 }
 
-func DashedLine() {
-	if !IsInteractive() {
-		Print(SecondaryColor, false, ellipsis)
+func (t *Term) DashedLine() {
+	if !t.IsInteractive() {
+		t.Print(SecondaryColor, false, ellipsis)
 
 		return
 	}
 
-	_, col, err := GetCursorPosition()
+	_, col, err := t.GetCursorPosition()
 	if err != nil {
-		Print(SecondaryColor, false, ellipsis)
+		t.Print(SecondaryColor, false, ellipsis)
 
 		return
 	}
 
-	Print(SecondaryColor, false, strings.Repeat(ellipsis, width-col))
+	t.Print(SecondaryColor, false, strings.Repeat(ellipsis, t.width-col))
 }
 
-func GetCursorPosition() (int, int, error) {
-	if !IsInteractive() {
+func (t *Term) GetCursorPosition() (int, int, error) {
+	if !t.IsInteractive() {
 		return 0, 0, fmt.Errorf("not an interactive terminal")
 	}
 

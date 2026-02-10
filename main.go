@@ -33,8 +33,7 @@ func main() {
 		Version:        version,
 		DefaultCommand: runCommandName,
 		CommandNotFound: func(c *cli.Context, command string) {
-			terminal.Error(fmt.Errorf("command not found: %s", command))
-			terminal.CleanUp()
+			print(fmt.Errorf("Command not found: %s", command))
 			os.Exit(1)
 		},
 		Commands: []*cli.Command{
@@ -95,7 +94,14 @@ func main() {
 						Name:       "no-color",
 						Aliases:    []string{"nc"},
 						Value:      false,
-						Usage:      "Disable color output and spinner",
+						Usage:      "Disable color output",
+						HasBeenSet: true,
+					},
+					&cli.BoolFlag{
+						Name:       "no-interactive",
+						Aliases:    []string{"ni"},
+						Value:      false,
+						Usage:      "Disable interactive/animated mode",
 						HasBeenSet: true,
 					},
 					&cli.StringFlag{
@@ -121,7 +127,7 @@ func main() {
 						Name:       "no-color",
 						Aliases:    []string{"nc"},
 						Value:      false,
-						Usage:      "Disable color output and spinner",
+						Usage:      "Disable color output",
 						HasBeenSet: true,
 					},
 					&cli.BoolFlag{
@@ -157,6 +163,20 @@ func main() {
 					&cli.StringFlag{Name: "host", Aliases: []string{"i"}, Usage: "Host to check", Value: "localhost"},
 					&cli.IntFlag{Name: "port", Aliases: []string{"p"}, Usage: "Port to check", Required: true},
 					&cli.IntFlag{Name: "timeout", Aliases: []string{"t"}, Usage: "Timeout in seconds", Value: 5},
+					&cli.BoolFlag{
+						Name:       "no-color",
+						Aliases:    []string{"nc"},
+						Value:      false,
+						Usage:      "Disable color output",
+						HasBeenSet: true,
+					},
+					&cli.BoolFlag{
+						Name:       "no-interactive",
+						Aliases:    []string{"ni"},
+						Value:      false,
+						Usage:      "Disable interactive/animated mode",
+						HasBeenSet: true,
+					},
 				},
 				Action: newActionFunc(commands.Port),
 			},
@@ -172,6 +192,20 @@ func main() {
 					},
 					&cli.StringFlag{Name: "url", Aliases: []string{"u"}, Usage: "URL to check", Required: true},
 					&cli.IntFlag{Name: "timeout", Aliases: []string{"t"}, Usage: "Timeout in seconds", Value: 5},
+					&cli.BoolFlag{
+						Name:       "no-color",
+						Aliases:    []string{"nc"},
+						Value:      false,
+						Usage:      "Disable color output",
+						HasBeenSet: true,
+					},
+					&cli.BoolFlag{
+						Name:       "no-interactive",
+						Aliases:    []string{"ni"},
+						Value:      false,
+						Usage:      "Disable interactive/animated mode",
+						HasBeenSet: true,
+					},
 				},
 				Action: newActionFunc(commands.Web),
 			},
@@ -186,14 +220,8 @@ func main() {
 		},
 	}
 
-	defer terminal.CleanUp()
-
 	err := app.Run(os.Args)
 	if err != nil {
-		print()
-		terminal.Error(err)
-		print()
-		terminal.CleanUp()
 		os.Exit(1)
 	}
 }

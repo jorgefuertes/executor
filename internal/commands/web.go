@@ -9,7 +9,10 @@ import (
 )
 
 func Web(cfg *config.Config) error {
-	p := terminal.NewProgress(cfg.Desc, cfg.Style)
+	t := terminal.New(cfg)
+	defer t.CleanUp()
+
+	p := t.NewProgress(cfg.Desc)
 	p.Start()
 
 	c := http.Client{
@@ -21,11 +24,16 @@ func Web(cfg *config.Config) error {
 	p.Stop(err == nil && resp.StatusCode == http.StatusOK)
 
 	if err != nil {
+		t.Error(err)
+
 		return err
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return errors.New(http.StatusText(resp.StatusCode))
+		err := errors.New(http.StatusText(resp.StatusCode))
+		t.Error(err)
+
+		return err
 	}
 
 	return nil

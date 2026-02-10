@@ -5,7 +5,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/jorgefuertes/executor/internal/terminal"
 	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli/v2"
 )
@@ -16,6 +15,7 @@ type Config struct {
 	ShowEnv           bool
 	Style             string
 	NoColor           bool
+	NoInteractive     bool
 	ShowOutput        bool
 	ShowOutputOnError bool
 	Silent            bool
@@ -35,6 +35,7 @@ func New(c *cli.Context) *Config {
 		ShowEnv:           c.Bool("show-env"),
 		Style:             c.String("spinner-style"),
 		NoColor:           c.Bool("no-color"),
+		NoInteractive:     c.Bool("no-interactive"),
 		ShowOutput:        c.Bool("show-output"),
 		ShowOutputOnError: c.Bool("show-output-on-error"),
 		Silent:            c.Bool("silent"),
@@ -59,7 +60,7 @@ func New(c *cli.Context) *Config {
 }
 
 func (c Config) Print() {
-	terminal.TableTile("Configuration")
+	print("\n*** Configuration ***\n\n")
 
 	t := tablewriter.NewWriter(os.Stdout)
 	t.SetHeader([]string{"Flag", "Value"})
@@ -74,6 +75,7 @@ func (c Config) Print() {
 		{"ShowEnv", fmt.Sprintf("%t", c.ShowEnv)},
 		{"Style", c.Style},
 		{"NoColor", fmt.Sprintf("%t", c.NoColor)},
+		{"NoInteractive", fmt.Sprintf("%t", c.NoInteractive)},
 		{"ShowOutput", fmt.Sprintf("%t", c.ShowOutput)},
 		{"ShowOutputOnError", fmt.Sprintf("%t", c.ShowOutputOnError)},
 		{"Silent", fmt.Sprintf("%t", c.Silent)},

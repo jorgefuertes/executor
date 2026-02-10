@@ -13,7 +13,8 @@ import (
 )
 
 func Run(cfg *config.Config) error {
-	terminal.SetNoColor(cfg.NoColor)
+	t := terminal.New(cfg)
+	defer t.CleanUp()
 
 	if len(cfg.Command) == 0 {
 		return ErrEmptyCommand
@@ -23,7 +24,7 @@ func Run(cfg *config.Config) error {
 
 	if cfg.ShowEnv {
 		fmt.Println()
-		terminal.TableTile("Environment")
+		t.TableTile("Environment")
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetCaption(true, fmt.Sprintf("%s: %d vars", cfg.EnvFileName, len(mainEnv)))
 		table.SetHeader([]string{"Variable", "Value"})
@@ -41,7 +42,7 @@ func Run(cfg *config.Config) error {
 		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", k, v))
 	}
 
-	progress := terminal.NewProgress(cfg.Desc, cfg.Style)
+	progress := t.NewProgress(cfg.Desc)
 	cmd.Stdout = progress.OutBuffer
 	cmd.Stderr = progress.ErrBuffer
 	progress.Start()
@@ -54,7 +55,7 @@ func Run(cfg *config.Config) error {
 		err := cmd.Process.Signal(syscall.SIGTERM)
 		progress.Stop(false)
 		if err != nil {
-			terminal.Error(err)
+			t.Error(err)
 		}
 		os.Exit(1)
 	}()
@@ -63,12 +64,12 @@ func Run(cfg *config.Config) error {
 	progress.Stop(err == nil)
 
 	if err != nil && cfg.ShowAnyOutput() {
-		terminal.Line(terminal.WarnLevel, "Failed command: "+cfg.Command, false)
+		t.Line(terminal.WarnLevel, "Failed command: "+cfg.Command, false)
 	}
 
 	if cfg.ShowOutput || (err != nil && cfg.ShowOutputOnError) {
 		fmt.Println()
-		terminal.Line(terminal.WarnLevel, "Command output:", false)
+		t.Line(terminal.WarnLevel, "Command output:", false)
 		fmt.Print(progress.OutBuffer.String())
 		fmt.Println()
 		fmt.Print(progress.ErrBuffer.String())

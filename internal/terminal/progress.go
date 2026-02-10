@@ -13,6 +13,7 @@ import (
 )
 
 type Progress struct {
+	t              *Term
 	title          string
 	spinner        spinner
 	lastPrintedLen int
@@ -25,15 +26,16 @@ type Progress struct {
 	ErrBuffer      *bytes.Buffer
 }
 
-func NewProgress(title, style string) *Progress {
+func (t *Term) NewProgress(title string) *Progress {
 	ctx, cancel := context.WithCancel(context.Background())
 
-	s, ok := spinners[style]
+	s, ok := spinners[t.cfg.Style]
 	if !ok {
 		s = spinners["dots"]
 	}
 
 	return &Progress{
+		t:         t,
 		title:     title,
 		spinner:   s,
 		start:     time.Now(),
@@ -46,27 +48,29 @@ func NewProgress(title, style string) *Progress {
 }
 
 func (p *Progress) elapsed() string {
-	t := time.Since(p.start)
-	m := int(math.Floor(t.Minutes()))
-	s := int(math.Floor(t.Seconds())) % 60
-	ms := t.Milliseconds()
+	et := time.Since(p.start)
+	m := int(math.Floor(et.Minutes()))
+	s := int(math.Floor(et.Seconds())) % 60
+	ms := et.Milliseconds()
 
-	out := "["
+	var b strings.Builder
+
+	b.WriteString("[")
 	if m > 0 {
-		out += fmt.Sprintf("%d min", m)
+		b.WriteString(fmt.Sprintf("%d min", m))
 	}
 	if s > 0 {
 		if m > 0 {
-			out += ", "
+			b.WriteString(", ")
 		}
-		out += fmt.Sprintf("%d sec", s)
+		b.WriteString(fmt.Sprintf("%d sec", s))
 	}
 	if m == 0 && s == 0 {
-		out += fmt.Sprintf("%d ms", ms)
+		b.WriteString(fmt.Sprintf("%d ms", ms))
 	}
-	out += "]"
+	b.WriteString("]")
 
-	return out
+	return b.String()
 }
 
 func (p *Progress) bufLen() string {
@@ -80,13 +84,13 @@ func (p *Progress) bufLen() string {
 func (p *Progress) Start() {
 	p.lock.Lock()
 
-	Action(InfoLevel, p.title, true)
+	p.t.Action(InfoLevel, p.title, true)
 	time.Sleep(slowPrintDelay)
 
 	p.lock.Unlock()
 	p.start = time.Now()
 
-	if !IsInteractive() {
+	if !p.t.IsInteractive() {
 		return
 	}
 
@@ -101,10 +105,10 @@ func (p *Progress) Start() {
 			}
 
 			print(" ")
-			Print(ClockColor, Fast, p.elapsed())
+			p.t.Print(ClockColor, Fast, p.elapsed())
 			printedLen := len(p.elapsed()) + 1
 			if len(p.bufLen()) > 0 {
-				Print(SizeColor, Fast, p.bufLen())
+				p.t.Print(SizeColor, Fast, p.bufLen())
 				printedLen += len(p.bufLen())
 			}
 			print(" ")
@@ -115,7 +119,7 @@ func (p *Progress) Start() {
 				p.spin = 0
 			}
 
-			Print(SpinnerColor, Fast, p.spinner.chars[p.spin])
+			p.t.Print(SpinnerColor, Fast, p.spinner.chars[p.spin])
 			printedLen++
 			if p.lastPrintedLen > printedLen {
 				print(strings.Repeat(" ", p.lastPrintedLen-printedLen))
@@ -133,10 +137,19 @@ func (p *Progress) Start() {
 
 func (p *Progress) Stop(result bool) {
 	p.cancel()
+	defer p.t.ShowCursor()
 
-	DashedLine()
+	if !p.t.IsInteractive() {
+		p.t.Print(SecondaryColor, Fast, ellipsis)
+		p.t.Print(ClockColor, Fast, p.elapsed())
+		p.t.Print(SecondaryColor, Fast, ellipsis)
+		p.t.Result(result)
+
+		return
+	}
+
+	p.t.DashedLine()
 	print(strings.Repeat("\b", len(p.elapsed())+5))
-	Print(ClockColor, Fast, p.elapsed())
-	Result(result)
-	ShowCursor()
+	p.t.Print(ClockColor, Fast, p.elapsed())
+	p.t.Result(result)
 }

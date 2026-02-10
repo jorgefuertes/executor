@@ -13,9 +13,9 @@ const (
 	ellipsis              = "…"
 )
 
-func Print(colorName colorStyle, slow bool, text string) {
-	if !slow || !IsInteractive() {
-		if HasColor() {
+func (t *Term) Print(colorName colorStyle, slow bool, text string) {
+	if !slow || !t.IsInteractive() {
+		if t.HasColor() {
 			print(getColorStyle(colorName).Render(text))
 		} else {
 			print(text)
@@ -25,7 +25,7 @@ func Print(colorName colorStyle, slow bool, text string) {
 	}
 
 	for _, r := range text {
-		if HasColor() {
+		if t.HasColor() {
 			print(getColorStyle(colorName).Render(string(cursorChar)))
 		} else {
 			print(string(cursorChar))
@@ -33,7 +33,7 @@ func Print(colorName colorStyle, slow bool, text string) {
 
 		time.Sleep(slowPrintDelay)
 		print("\b")
-		if HasColor() {
+		if t.HasColor() {
 			print(getColorStyle(colorName).Render(string(r)))
 		} else {
 			print(string(r))
@@ -41,46 +41,46 @@ func Print(colorName colorStyle, slow bool, text string) {
 	}
 }
 
-func PrintF(colorName colorStyle, slow bool, format string, a ...any) {
+func (t *Term) PrintF(colorName colorStyle, slow bool, format string, a ...any) {
 	text := fmt.Sprintf(format, a...)
-	Print(colorName, slow, text)
+	t.Print(colorName, slow, text)
 }
 
-func caret(level Level) {
+func (t *Term) caret(level Level) {
 	switch level {
 	case DebugLevel:
-		Print(DebugLevelColor, Fast, ">")
+		t.Print(DebugLevelColor, Fast, ">")
 	case InfoLevel:
-		Print(InfoLevelColor, Fast, ">")
+		t.Print(InfoLevelColor, Fast, ">")
 	case WarnLevel:
-		Print(WarnLevelColor, Fast, ">")
+		t.Print(WarnLevelColor, Fast, ">")
 	case ErrorLevel:
-		Print(ErrorLevelColor, Fast, ">")
+		t.Print(ErrorLevelColor, Fast, ">")
 	}
 
 	print(" ")
 }
 
-func Line(level Level, msg string, slow bool) {
-	caret(level)
-	Print(PrimaryColor, slow, msg+"\n")
+func (t *Term) Line(level Level, msg string, slow bool) {
+	t.caret(level)
+	t.Print(PrimaryColor, slow, msg+"\n")
 }
 
-func Action(level Level, msg string, slow bool) int {
-	caret(level)
+func (t *Term) Action(level Level, msg string, slow bool) int {
+	t.caret(level)
 
-	Print(PrimaryColor, slow, msg+":")
+	t.Print(PrimaryColor, slow, msg+":")
 
 	return len(msg) + 3
 }
 
-func Error(err error) {
+func (t *Term) Error(err error) {
 	if err == nil {
 		return
 	}
 
-	caret(ErrorLevel)
-	Print(ErrorColor, false, "ERROR")
-	PrintF(PrimaryColor, false, ": %s", err.Error())
+	t.caret(ErrorLevel)
+	t.Print(ErrorColor, false, "ERROR")
+	t.PrintF(PrimaryColor, false, ": %s", err.Error())
 	fmt.Println()
 }

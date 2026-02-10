@@ -13,7 +13,10 @@ func Port(cfg *config.Config) error {
 	ctx, cancel := context.WithTimeout(context.Background(), cfg.Timeout)
 	defer cancel()
 
-	p := terminal.NewProgress(fmt.Sprintf("%s (%d)", cfg.Desc, cfg.Port), cfg.Style)
+	t := terminal.New(cfg)
+	defer t.CleanUp()
+
+	p := t.NewProgress(fmt.Sprintf("%s (%d)", cfg.Desc, cfg.Port))
 	p.Start()
 
 	var err error
@@ -32,6 +35,7 @@ func Port(cfg *config.Config) error {
 
 	p.Stop(err == nil)
 	if err != nil {
+		t.Error(err)
 		return err
 	}
 

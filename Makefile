@@ -19,13 +19,27 @@ test-v:
 
 run:
 	@go run main.go run --desc "Short run test" -c "sleep 2; echo \"!Hola, Mundo!\""; \
-
 run-which:
 	@go run main.go which -c ls
 	@echo "Running silently OK"
 	@go run main.go which --silent -c ls
 	@echo "Running silently FAIL"
 	@go run main.go which --silent -c non-existing-command
+run-long:
+	@go run main.go run --desc "Long run test" -c "sleep 63; echo Hello";
+run-short:
+	@go run main.go run --desc "Short run test" -c "sleep 0.2; echo Hello";
+run-with-slow-output:
+	@go run main.go run --desc "Run with output" -c "cat Makefile | pv -qL 150"
+run-help:
+	@go run main.go run --help
+run-show-env:
+	@go run main.go run -se --desc "Show env" -c "echo '¡Hola, Mundo!'"
+run-output:
+	@echo
+	@go run main.go run --desc "No error, show output" -so -c "sleep 1; echo '¡Hola, Mundo!'; echo 'No errors' >&2"
+	@echo
+	@go run main.go run --desc "Error, show output" -so -c "sleep 1; echo '¡Hola, Mundo!'; echo 'This is an error' >&2; exit 1"
 
 demo:
 	@clear
@@ -41,26 +55,10 @@ demo:
 		SECS=$$(($${RANDOM} % 3 + 1)); \
 		go run main.go run --desc "$${DESC}" -st $$style -c "sleep $${SECS}; echo Hello"; \
 	done
-	@go run main.go run --desc "Not interactive and no color test" --nc -st bar -c "sleep 1; echo Hello"
 	@go run main.go which -c "ls"
-
-run-long:
-	@go run main.go run --desc "Long run test" -c "sleep 63; echo Hello";
-run-short:
-	@go run main.go run --desc "Short run test" -c "sleep 0.2; echo Hello";
-run-with-slow-output:
-	@go run main.go run --desc "Run with output" -c "cat Makefile | pv -qL 150"
-run-help:
-	@go run main.go run --help
-
-run-show-env:
-	@go run main.go run -se --desc "Show env" -c "echo '¡Hola, Mundo!'"
-
-run-output:
-	@echo
-	@go run main.go run --desc "No error, show output" -so -c "sleep 1; echo '¡Hola, Mundo!'; echo 'No errors' >&2"
-	@echo
-	@go run main.go run --desc "Error, show output" -so -c "sleep 1; echo '¡Hola, Mundo!'; echo 'This is an error' >&2; exit 1"
+	@go run main.go run --desc "No color test" --nc -st bar -c "sleep 1; echo Hello"
+	@go run main.go run --desc "Non interactive test" --ni -st bar -c "sleep 1; echo Hello"
+	@go run main.go run --desc "Not interactive and no color test" --nc --ni -c "sleep 1; echo Hello"
 
 build: clean lint test
 	@mkdir -p $(BUILD_DIR)

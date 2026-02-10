@@ -2,7 +2,6 @@ package terminal
 
 import (
 	"github.com/charmbracelet/lipgloss"
-	"github.com/muesli/termenv"
 )
 
 type theme byte
@@ -96,12 +95,4 @@ func getColorStyle(cs colorStyle) lipgloss.Style {
 	}
 
 	return colorMap[theme][cs]
-}
-
-func HasColor() bool {
-	return !nocolor && termenv.ColorProfile() != termenv.Ascii
-}
-
-func SetNoColor(forceNoColor bool) {
-	nocolor = forceNoColor
 }
