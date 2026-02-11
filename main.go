@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"runtime/debug"
 
 	"github.com/jorgefuertes/executor/internal/commands"
 	"github.com/jorgefuertes/executor/internal/config"
@@ -26,11 +27,24 @@ const (
 
 var version string
 
+func getVersion() string {
+	if version != "" {
+		return version
+	}
+
+	info, ok := debug.ReadBuildInfo()
+	if ok && info.Main.Version != "" && info.Main.Version != "(devel)" {
+		return info.Main.Version
+	}
+
+	return "unknown"
+}
+
 func main() {
 	app := &cli.App{
 		Name:           "executor",
 		Usage:          "Execute commands in fancy way",
-		Version:        version,
+		Version:        getVersion(),
 		DefaultCommand: runCommandName,
 		CommandNotFound: func(c *cli.Context, command string) {
 			print(fmt.Errorf("command not found: %s", command))
@@ -213,7 +227,7 @@ func main() {
 				Name:  versionCommandName,
 				Usage: "Show version",
 				Action: func(c *cli.Context) error {
-					print(version)
+					print(getVersion())
 					return nil
 				},
 			},
