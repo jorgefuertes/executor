@@ -63,13 +63,9 @@ func (c Config) Print() {
 	print("\n*** Configuration ***\n\n")
 
 	t := tablewriter.NewWriter(os.Stdout)
-	t.SetHeader([]string{"Flag", "Value"})
-	t.SetColumnColor(
-		tablewriter.Colors{tablewriter.FgCyanColor, tablewriter.Italic},
-		tablewriter.Colors{tablewriter.FgYellowColor, tablewriter.Bold},
-	)
+	t.Header("Flag", "Value")
 
-	t.AppendBulk([][]string{
+	rows := [][]string{
 		{"EnvFileName", c.EnvFileName},
 		{"EnvRecurseLevels", fmt.Sprintf("%d", c.EnvRecurseLevels)},
 		{"ShowEnv", fmt.Sprintf("%t", c.ShowEnv)},
@@ -86,9 +82,13 @@ func (c Config) Print() {
 		{"Port", fmt.Sprintf("%d", c.Port)},
 		{"URL", c.URL},
 		{"Timeout", fmt.Sprintf("%d", c.Timeout)},
-	})
+	}
 
-	t.Render()
+	for _, row := range rows {
+		_ = t.Append(row)
+	}
+
+	_ = t.Render()
 }
 
 func (c Config) ShowAnyOutput() bool {

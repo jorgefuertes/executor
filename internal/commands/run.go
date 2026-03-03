@@ -10,6 +10,7 @@ import (
 	"github.com/jorgefuertes/executor/internal/config"
 	"github.com/jorgefuertes/executor/internal/terminal"
 	"github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/tablewriter/tw"
 )
 
 func Run(cfg *config.Config) error {
@@ -26,12 +27,12 @@ func Run(cfg *config.Config) error {
 		fmt.Println()
 		t.TableTile("Environment")
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetCaption(true, fmt.Sprintf("%s: %d vars", cfg.EnvFileName, len(mainEnv)))
-		table.SetHeader([]string{"Variable", "Value"})
+		table.Caption(tw.Caption{Text: fmt.Sprintf("%s: %d vars", cfg.EnvFileName, len(mainEnv))})
+		table.Header("Variable", "Value")
 		for k, v := range mainEnv {
-			table.Rich([]string{k, v}, []tablewriter.Colors{{tablewriter.FgCyanColor}, {tablewriter.FgHiYellowColor}})
+			_ = table.Append([]string{k, v})
 		}
-		table.Render()
+		_ = table.Render()
 		fmt.Println()
 	}
 
