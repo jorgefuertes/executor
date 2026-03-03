@@ -57,16 +57,16 @@ func (p *Progress) elapsed() string {
 
 	b.WriteString("[")
 	if m > 0 {
-		b.WriteString(fmt.Sprintf("%d min", m))
+		fmt.Fprintf(&b, "%d min", m)
 	}
 	if s > 0 {
 		if m > 0 {
 			b.WriteString(", ")
 		}
-		b.WriteString(fmt.Sprintf("%d sec", s))
+		fmt.Fprintf(&b, "%d sec", s)
 	}
 	if m == 0 && s == 0 {
-		b.WriteString(fmt.Sprintf("%d ms", ms))
+		fmt.Fprintf(&b, "%d ms", ms)
 	}
 	b.WriteString("]")
 
