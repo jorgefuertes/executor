@@ -57,8 +57,8 @@ jobs:
           mkdir -p release
           for os in linux darwin windows; do
             for arch in amd64 386 arm arm64; do
-              # Skip unsupported darwin combinations
-              if [[ "$os/$arch" != "darwin/arm" && "$os/$arch" != "darwin/386" ]]; then
+              # Skip unsupported combinations
+              if [[ "$os/$arch" != "darwin/arm" && "$os/$arch" != "darwin/386" && "$os/$arch" != "windows/arm" ]]; then
                 executable="executor"
                 archive_name="executor_${os}-${arch}_${TAG_NAME//./_}"
                 # .exe and zip for windows, tar.gz for others
