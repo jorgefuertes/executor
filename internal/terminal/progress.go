@@ -153,3 +153,17 @@ func (p *Progress) Stop(result bool) {
 	p.t.Print(ClockColor, Fast, p.elapsed())
 	p.t.Result(result)
 }
+
+func (p *Progress) Cancel(result bool) {
+	p.cancel()
+	defer p.t.ShowCursor()
+
+	text := " CANCELED "
+	if !p.t.HasColor() {
+		text = "[CANCELED]"
+	}
+
+	println()
+	p.t.Print(ErrorLabelColor, Fast, text)
+	println()
+}

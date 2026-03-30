@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -36,7 +37,8 @@ func Run(cfg *config.Config) error {
 		fmt.Println()
 	}
 
-	cmd := exec.Command("sh", "-c", cfg.Command)
+	cmdCtx, cancel := context.WithCancel(context.Background())
+	cmd := exec.CommandContext(cmdCtx, "sh", "-c", cfg.Command)
 
 	cmd.Env = os.Environ()
 	for k, v := range mainEnv {
@@ -53,16 +55,14 @@ func Run(cfg *config.Config) error {
 
 	go func() {
 		<-ch
-		err := cmd.Process.Signal(syscall.SIGTERM)
-		progress.Stop(false)
-		if err != nil {
-			t.Error(err)
-		}
+		progress.Cancel(false)
+		cancel()
 		os.Exit(1)
 	}()
 
 	err := cmd.Run()
 	progress.Stop(err == nil)
+	cmdCtx.Done()
 
 	if err != nil && cfg.ShowAnyOutput() {
 		t.Line(terminal.WarnLevel, "Failed command: "+cfg.Command, false)
