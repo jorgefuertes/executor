@@ -57,10 +57,13 @@ func Run(cfg *config.Config) error {
 		<-ch
 		progress.Cancel(false)
 		cancel()
+		t.CleanUp()
 		os.Exit(1)
 	}()
 
+	t.DisableEcho()
 	err := cmd.Run()
+	t.RestoreEcho()
 	progress.Stop(err == nil)
 	cmdCtx.Done()
 
