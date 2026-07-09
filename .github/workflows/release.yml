@@ -20,6 +20,8 @@ jobs:
     name: Create and Publish Release
     runs-on: ubuntu-latest
     needs: [lint, test]
+    permissions:
+      contents: write
 
     steps:
       - name: Set up Go
@@ -120,5 +122,5 @@ jobs:
         with:
           token: ${{ secrets.PUBLISH_TOKEN }}
           files: |
-            ${{ github.event.repository.name }}-${{ steps.get_tag_name.outputs.TAG_NAME }}.tar.gz
+            ${{ github.event.repository.name }}-${{ env.TAG_NAME }}.tar.gz
             release/*
