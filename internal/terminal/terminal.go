@@ -8,7 +8,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/jorgefuertes/executor/internal/config"
 	"github.com/muesli/termenv"
-	"golang.org/x/sys/unix"
 	"golang.org/x/term"
 )
 
@@ -29,7 +28,7 @@ type Term struct {
 	color        bool
 	interactive  bool
 	width        int
-	savedTermios *unix.Termios
+	savedTermios any
 }
 
 func New(cfg *config.Config) *Term {
@@ -64,35 +63,6 @@ func New(cfg *config.Config) *Term {
 func (t *Term) CleanUp() {
 	t.RestoreEcho()
 	t.ShowCursor()
-}
-
-func (t *Term) DisableEcho() {
-	if !t.interactive {
-		return
-	}
-
-	fd := int(os.Stdin.Fd())
-
-	termios, err := unix.IoctlGetTermios(fd, ioctlGetTermios)
-	if err != nil {
-		return
-	}
-
-	saved := *termios
-	t.savedTermios = &saved
-
-	termios.Lflag &^= unix.ECHO
-	_ = unix.IoctlSetTermios(fd, ioctlSetTermios, termios)
-}
-
-func (t *Term) RestoreEcho() {
-	if t.savedTermios == nil {
-		return
-	}
-
-	fd := int(os.Stdin.Fd())
-	_ = unix.IoctlSetTermios(fd, ioctlSetTermios, t.savedTermios)
-	t.savedTermios = nil
 }
 
 func (t *Term) SetNoInteractive() {
